@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Reduzir Tamanho do PDF</h2>
+<p>Faça upload de um PDF para reduzir o tamanho.</p>
+
+<form action="{{ url_for('compress_pdf.compress_pdf') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" name="file" accept="application/pdf" class="form-control-file">
+    </div>
+    <button type="submit" class="btn btn-primary">Reduzir Tamanho</button>
+</form>
+{% endblock %}

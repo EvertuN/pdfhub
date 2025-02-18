@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>PDF para Imagem</h2>
+<p>Faça upload de um PDF para converter em imagens.</p>
+
+<form action="{{ url_for('pdf_to_image.pdf_to_image') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" name="file" accept="application/pdf" class="form-control-file">
+    </div>
+    <button type="submit" class="btn btn-primary">Converter para Imagem</button>
+</form>
+
+{% if images %}
+<div class="mt-4">
+    <h3>Imagens Geradas:</h3>
+    {% for image in images %}
+    <img src="{{ url_for('static', filename='uploads/' + image) }}" class="img-fluid mb-2">
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

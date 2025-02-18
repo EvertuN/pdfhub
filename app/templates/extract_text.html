@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Extrair Texto de PDF</h2>
+<p>Faça upload de um PDF para extrair o texto.</p>
+
+<form action="{{ url_for('extract_text.extract_text') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" name="file" accept="application/pdf" class="form-control-file">
+    </div>
+    <button type="submit" class="btn btn-primary">Extrair Texto</button>
+</form>
+
+{% if text %}
+<div class="mt-4">
+    <h3>Texto Extraído:</h3>
+    <pre class="text-light">{{ text }}</pre>
+</div>
+{% endif %}
+{% endblock %}

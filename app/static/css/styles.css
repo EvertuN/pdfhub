@@ -1,0 +1,122 @@
+/* Tema Escuro (Padrão) */
+body.theme-dark {
+    background-color: #000000;
+    color: #ffffff;
+}
+
+.theme-dark .navbar {
+    background-color: #0d0d0d !important;
+}
+
+.theme-dark .navbar .nav-link {
+    color: #ffffff !important;
+}
+
+.theme-dark .navbar-brand {
+    color: #ffffff !important;
+        font-weight: bold;
+
+}
+
+.theme-dark .container {
+    background-color: #1a1a1a;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.theme-dark .btn-primary {
+    background-color: #333333;
+    border-color: #262626;
+}
+
+.theme-dark .btn-primary:hover {
+    background-color: #262626;
+    border-color: #1a1a1a;
+}
+
+/* Tema Claro */
+body.theme-light {
+    background-color: #ffffff;
+    color: #000000;
+}
+
+.theme-light .navbar {
+    background-color: #f8f9fa !important;
+}
+
+.theme-light .navbar .nav-link {
+    color: #000000 !important; /* Letras pretas no modo claro */
+}
+
+.theme-light .navbar-brand {
+    color: #000000 !important; /* Letras pretas no modo claro */
+    font-weight: bold;
+}
+
+.theme-light .container {
+    background-color: #e9ecef;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.theme-light .btn-primary {
+    background-color: #ff6f00; /* Laranja */
+    border-color: #e65a00;
+}
+
+.theme-light .btn-primary:hover {
+    background-color: #e65a00;
+    border-color: #cc4c00;
+}
+
+.theme-light .custom-control-label {
+    color: #000000 !important;
+}
+
+/* BOTÃO ESTILIZADO INICIO*/
+
+
+
+/* BOTÃO ESTILIZADO FIM*/
+
+/* Estilo para os cards */
+.card {
+    background-color: #1a1a1a; /* Cor de fundo do card */
+    border: 1px solid #333333; /* Borda do card */
+    border-radius: 10px; /* Bordas arredondadas */
+    transition: transform 0.2s, box-shadow 0.2s; /* Efeito de hover */
+}
+
+.card:hover {
+    transform: translateY(-5px); /* Efeito de levantar ao passar o mouse */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra ao passar o mouse */
+}
+
+.card-body {
+    padding: 20px;
+    color: #ffffff
+}
+
+.card-title {
+    font-size: 1.25rem;
+    margin-bottom: 10px;
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #cccccc; /* Cor do subtítulo */
+}
+
+/* Ajustes para o tema claro */
+.theme-light .card {
+    background-color: #ffffff;
+    border-color: #e9ecef;
+}
+
+.theme-light .card-text {
+    color: #666666;
+}
+
+.theme-light .card-body {
+    color: #000000;
+}

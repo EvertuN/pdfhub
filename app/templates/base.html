@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Hub</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+</head>
+<body class="theme-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="{{ url_for('home.home') }}">PDF Hub</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('merge_pdf.merge_pdf') }}">Juntar PDF</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('extract_text.extract_text') }}">Extrair Texto</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('pdf_to_image.pdf_to_image') }}">PDF para Imagem</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('image_to_pdf.image_to_pdf') }}">Imagem para PDF</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('watermark.watermark') }}">Adicionar Watermark</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('compress_pdf.compress_pdf') }}">Reduzir Tamanho do PDF</a>
+            </li>
+        </ul>
+        <div class="custom-control custom-switch">
+            <input type="checkbox" class="custom-control-input" id="themeSwitch">
+            <label class="custom-control-label text-light" for="themeSwitch">Tema Claro</label>
+        </div>
+    </div>
+</nav>
+<div class="container mt-4">
+    {% block content %}{% endblock %}
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

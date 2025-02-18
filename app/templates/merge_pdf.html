@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Juntar PDFs</h2>
+<p>Faça upload dos PDFs e arraste para reordenar.</p>
+
+<form action="{{ url_for('merge_pdf.merge_pdf') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" name="files" multiple accept="application/pdf" class="form-control-file">
+    </div>
+    <div id="pdf-preview" class="mb-3">
+        <!-- PDF previews will be added here dynamically -->
+    </div>
+    <button type="submit" class="btn btn-primary">Juntar PDFs</button>
+</form>
+
+<script src="{{ url_for('static', filename='js/merge_pdf.js') }}"></script>
+{% endblock %}

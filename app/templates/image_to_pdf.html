@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Imagem para PDF</h2>
+<p>Faça upload de imagens para converter em PDF.</p>
+
+<form action="{{ url_for('image_to_pdf.image_to_pdf') }}" method="POST" enctype="multipart/form-data">
+    <div class="form-group">
+        <input type="file" name="files" multiple accept="image/*" class="form-control-file">
+    </div>
+    <button type="submit" class="btn btn-primary">Converter para PDF</button>
+</form>
+{% endblock %}
