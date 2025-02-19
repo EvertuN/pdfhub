@@ -26,6 +26,7 @@ def merge_pdf():
 
     return render_template('merge_pdf.html')
 
+
 @merge_pdf_bp.route('/download')
 def download():
     file_type = request.args.get('file_type', 'Arquivo')
@@ -51,7 +52,7 @@ def delete_file():
 @merge_pdf_bp.route('/rotate-pdf', methods=['POST'])
 def rotate_pdf():
     file = request.files['file']
-    angle = int(request.form.get('angle', 90))
+    # angle = int(request.form.get('angle', 90))
 
     # Ler o PDF
     reader = PdfReader(file)
@@ -67,11 +68,13 @@ def rotate_pdf():
     writer.write(output)
     output.seek(0)
 
-    return jsonify({
-        'success': True,
-        'message': 'PDF girado com sucesso!',
-        'downloadUrl': url_for('merge_pdf.download_rotated', _external=True),
-    })
+    # Retornar o arquivo girado para download
+    return send_file(
+        output,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name='rotated.pdf'
+    )
 
 @merge_pdf_bp.route('/download-rotated', methods=['GET'])
 def download_rotated():
