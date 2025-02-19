@@ -1,6 +1,7 @@
-from flask import Blueprint, render_template, request, redirect, url_for
+from PyPDF2 import PdfReader, PdfWriter
+from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file
 from app.models.pdf_model import merge_pdfs
-import os
+import os, io
 
 merge_pdf_bp = Blueprint('merge_pdf', __name__)
 
@@ -9,14 +10,73 @@ merge_pdf_bp = Blueprint('merge_pdf', __name__)
 def merge_pdf():
     if request.method == 'POST':
         files = request.files.getlist('files')
-        file_paths = []
-        for file in files:
-            file_path = os.path.join('app/static/uploads', file.filename)
-            file.save(file_path)
-            file_paths.append(file_path)
 
-        output_path = os.path.join('app/static/uploads', 'merged.pdf')
-        merge_pdfs(file_paths, output_path)
-        return redirect(url_for('merge_pdf.merge_pdf'))
+        output = io.BytesIO()
+        merge_pdfs(files, output)
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name='merged.pdf'
+        )
 
     return render_template('merge_pdf.html')
+
+@merge_pdf_bp.route('/download')
+def download():
+    file_type = request.args.get('file_type', 'Arquivo')
+    download_url = url_for('static', filename='uploads/temp_merged.pdf', _external=True)
+    return render_template('download.html', download_url=download_url, file_type=file_type)
+
+@merge_pdf_bp.route('/delete-file', methods=['POST'])
+def delete_file():
+    filename = request.json.get('filename')
+
+    if not filename:
+        return jsonify({'success': False, 'message': 'Arquivo não especificado!'})
+
+    file_path = os.path.join('app/static/uploads', filename)
+
+    if os.path.exists(file_path):
+        os.remove(file_path)
+        return jsonify({'success': True, 'message': 'Arquivo excluído com sucesso!'})
+    else:
+        return jsonify({'success': False, 'message': 'Arquivo não encontrado!'})
+
+
+@merge_pdf_bp.route('/rotate-pdf', methods=['POST'])
+def rotate_pdf():
+    file = request.files['file']
+    angle = int(request.form.get('angle', 90))
+
+    # Ler o PDF
+    reader = PdfReader(file)
+    writer = PdfWriter()
+
+    # Girar cada página
+    for page in reader.pages:
+        page.rotate(angle)
+        writer.add_page(page)
+
+    # Salvar o PDF girado em memória
+    output = io.BytesIO()
+    writer.write(output)
+    output.seek(0)
+
+    return jsonify({
+        'success': True,
+        'message': 'PDF girado com sucesso!',
+        'downloadUrl': url_for('merge_pdf.download_rotated', _external=True),
+    })
+
+@merge_pdf_bp.route('/download-rotated', methods=['GET'])
+def download_rotated():
+    # Retornar o arquivo girado para download
+    return send_file(
+        output,
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name='rotated.pdf'
+    )

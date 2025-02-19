@@ -1,18 +1,51 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h2>Juntar PDFs</h2>
-<p>Faça upload dos PDFs e arraste para reordenar.</p>
+<h2>Juntar PDF</h2>
+<p>Adicione os PDF, arraste para reordenar e ajuste conforme necessário.</p>
 
-<form action="{{ url_for('merge_pdf.merge_pdf') }}" method="POST" enctype="multipart/form-data">
+<form id="mergeForm" data-url="{{ url_for('merge_pdf.merge_pdf') }}">
+    <!-- Campos do formulário -->
     <div class="form-group">
-        <input type="file" name="files" multiple accept="application/pdf" class="form-control-file">
+<!--        <input type="file" name="files" id="fileInput" multiple accept="application/pdf" class="form-control-file" style="display: none;">-->
+        <input type="file" id="fileInput" multiple style="display: none;">
+        <button type="button" id="addFilesBtn" class="btn btn-primary mb-3">
+            <i class="fas fa-plus"></i> Adicionar Arquivos
+        </button>
+        <button type="button" id="sortByNameBtn" class="btn btn-secondary mb-3">
+            <i class="fas fa-sort-alpha-down"></i> Ordenar por Nome
+        </button>
     </div>
-    <div id="pdf-preview" class="mb-3">
-        <!-- PDF previews will be added here dynamically -->
+
+    <!-- Área de Preview dos PDFs -->
+    <div id="pdfPreview" class="d-flex flex-wrap mb-3">
+        <!-- Os PDFs serão adicionados aqui dinamicamente -->
     </div>
-    <button type="submit" class="btn btn-primary">Juntar PDFs</button>
+
+    <button type="submit" class="btn btn-success">
+        <i class="fas fa-file-pdf"></i> Juntar PDFs
+    </button>
 </form>
 
+<!-- Template para cada PDF no preview -->
+<template id="pdfTemplate">
+    <div class="pdf-item card m-2" style="width: 150px;">
+        <div class="card-body text-center">
+            <canvas class="pdf-preview mb-2" style="width: 100%; height: 150px;"></canvas>
+            <p class="card-text pdf-name">Nome do Arquivo</p>
+            <div class="btn-group">
+                <button type="button" class="btn btn-danger btn-sm delete-pdf">
+                    <i class="fas fa-trash"></i>
+                </button>
+                <button type="button" class="btn btn-warning btn-sm rotate-pdf">
+                    <i class="fas fa-sync"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</template>
+
 <script src="{{ url_for('static', filename='js/merge_pdf.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+
 {% endblock %}

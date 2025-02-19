@@ -60,13 +60,13 @@ body.theme-light {
 }
 
 .theme-light .btn-primary {
-    background-color: #ff6f00; /* Laranja */
-    border-color: #e65a00;
+    background-color: #333333;
+    border-color: #262626;
 }
 
 .theme-light .btn-primary:hover {
-    background-color: #e65a00;
-    border-color: #cc4c00;
+    background-color: #262626;
+    border-color: #1a1a1a;
 }
 
 .theme-light .custom-control-label {
@@ -120,3 +120,26 @@ body.theme-light {
 .theme-light .card-body {
     color: #000000;
 }
+
+/* PDF PREVIEW ESTILO */
+/* Estilo para a área de preview */
+#pdfPreview {
+    gap: 10px;
+}
+
+/* Estilo para cada item de PDF */
+.pdf-item {
+    cursor: grab;
+    transition: transform 0.2s;
+}
+
+.pdf-item:active {
+    cursor: grabbing;
+}
+
+/* Efeito de hover nos botões */
+.delete-pdf:hover, .rotate-pdf:hover {
+    opacity: 0.8;
+}
+/* PDF PREVIEW ESTILO */
+
