@@ -73,11 +73,10 @@ body.theme-light {
     color: #000000 !important;
 }
 
-/* BOTÃO ESTILIZADO INICIO*/
+/* BOTÃO ESTILIZADO TEMA INICIO*/
 
 
-
-/* BOTÃO ESTILIZADO FIM*/
+/* BOTÃO ESTILIZADO TEMA FIM*/
 
 /* Estilo para os cards */
 .card {
@@ -122,7 +121,6 @@ body.theme-light {
 }
 
 /* PDF PREVIEW ESTILO */
-/* Estilo para a área de preview */
 #pdfPreview {
     gap: 10px;
 }
@@ -130,14 +128,15 @@ body.theme-light {
 /* Estilo para cada item de PDF */
 .pdf-item {
     cursor: grab;
-    transition: transform 0.2s;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .pdf-item:active {
     cursor: grabbing;
+    transform: scale(1.05);
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Efeito de hover nos botões */
 .delete-pdf:hover, .rotate-pdf:hover {
     opacity: 0.8;
 }

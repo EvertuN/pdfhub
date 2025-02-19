@@ -15,12 +15,14 @@ def merge_pdf():
         merge_pdfs(files, output)
         output.seek(0)
 
-        return send_file(
-            output,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name='merged.pdf'
-        )
+        temp_path = os.path.join('app/static/uploads', 'temp_merged.pdf')
+        with open(temp_path, 'wb') as f:
+            f.write(output.getvalue())
+
+        return jsonify({
+            'success': True,
+            'redirectUrl': url_for('merge_pdf.download', file_type='PDF Mesclados'),
+        })
 
     return render_template('merge_pdf.html')
 

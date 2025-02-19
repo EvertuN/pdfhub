@@ -10,7 +10,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 </head>
-<body class="theme-dark">
+<body class="theme-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <a class="navbar-brand" href="{{ url_for('home.home') }}">PDF Hub</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
@@ -40,7 +40,9 @@
         </ul>
         <div class="custom-control custom-switch">
             <input type="checkbox" class="custom-control-input" id="themeSwitch">
-            <label class="custom-control-label text-light" for="themeSwitch">Tema Claro</label>
+            <label class="custom-control-label" for="themeSwitch">
+                <span id="themeIcon">☀️</span> <!-- Ícone padrão (tema claro) -->
+            </label>
         </div>
     </div>
 </nav>

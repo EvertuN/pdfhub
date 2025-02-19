@@ -8,53 +8,59 @@ document.addEventListener('DOMContentLoaded', function () {
     let pdfFiles = [];
 
     // Função para adicionar arquivos ao preview
-    function addFiles(files) {
-        for (const file of files) {
-            const clone = document.importNode(pdfTemplate, true);
-            clone.querySelector('.pdf-name').textContent = file.name;
+// Função para adicionar arquivos ao preview
+function addFiles(files) {
+    for (const file of files) {
+        const clone = document.importNode(pdfTemplate, true);
+        clone.querySelector('.pdf-name').textContent = file.name;
 
-            // Renderizar a primeira página do PDF
-            const canvas = clone.querySelector('.pdf-preview');
-            renderPDFPreview(file, canvas);
+        // Renderizar a primeira página do PDF
+        const canvas = clone.querySelector('.pdf-preview');
+        renderPDFPreview(file, canvas);
 
-            // Botão para excluir o PDF
-            clone.querySelector('.delete-pdf').addEventListener('click', () => {
-                pdfPreview.removeChild(clone.querySelector('.pdf-item'));
-                pdfFiles = pdfFiles.filter(f => f.name !== file.name);
-            });
+        // Botão para excluir o PDF
+        clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
+            const card = event.target.closest('.pdf-item'); // Encontra o elemento .pdf-item pai
+            if (card) {
+                card.remove(); // Remove o card do DOM
+                pdfFiles = pdfFiles.filter(f => f.name !== file.name); // Remove o arquivo do array
+            }
+        });
 
-            // Botão para girar o PDF
-            clone.querySelector('.rotate-pdf').addEventListener('click', async () => {
-                const formData = new FormData();
-                formData.append('file', file);
-                formData.append('angle', 90); // Girar 90 graus
+// Botão para girar o PDF
+clone.querySelector('.rotate-pdf').addEventListener('click', async () => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('angle', 90); // Girar 90 graus
 
-                try {
-                    const response = await fetch("{{ url_for('merge_pdf.rotate_pdf') }}", {
-                        method: 'POST',
-                        body: formData,
-                    });
-                    const data = await response.json();
+    // Obter a URL do formulário
+    const rotateUrl = document.querySelector('#mergeForm').dataset.rotateUrl;
 
-                    if (data.success) {
-                        // Atualizar o preview com o PDF girado
-                        const blob = await fetch(data.downloadUrl).then(res => res.blob());
-                        const newFile = new File([blob], file.name, { type: 'application/pdf' });
-                        renderPDFPreview(newFile, canvas);
-                    } else {
-                        alert('Erro ao girar PDF.');
-                    }
-                } catch (error) {
-                    console.error('Erro:', error);
-                    alert('Erro ao girar PDF.');
-                }
-            });
+    try {
+        const response = await fetch(rotateUrl, {
+            method: 'POST',
+            body: formData,
+        });
+        const data = await response.json();
 
-            pdfPreview.appendChild(clone.querySelector('.pdf-item'));
-            pdfFiles.push(file);
+        if (data.success) {
+            // Atualizar o preview com o PDF girado
+            const blob = await fetch(data.downloadUrl).then(res => res.blob());
+            const newFile = new File([blob], file.name, { type: 'application/pdf' });
+            renderPDFPreview(newFile, canvas);
+        } else {
+            alert('Erro ao girar PDF.');
         }
+    } catch (error) {
+        console.error('Erro:', error);
+        alert('Erro ao girar PDF.');
     }
+});
 
+        pdfPreview.appendChild(clone.querySelector('.pdf-item'));
+        pdfFiles.push(file);
+    }
+}
     function renderPDFPreview(file, canvas) {
         const fileReader = new FileReader();
         fileReader.onload = function () {
@@ -126,32 +132,14 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
             method: 'POST',
             body: formData,
         });
+        const data = await response.json();
 
-        // Verificar se a resposta é JSON ou arquivo
-        const contentType = response.headers.get('Content-Type');
-
-        if (contentType && contentType.includes('application/json')) {
-            const data = await response.json();
-
-            if (data.success) {
-                // Redirecionar para a página de download
-                window.location.href = data.redirectUrl;
-            } else {
-                alert('Erro ao mesclar PDFs.');
-            }
-        } else if (contentType && contentType.includes('application/pdf')) {
-            // Tratar resposta como PDF
-            const blob = await response.blob();
-            const downloadUrl = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = downloadUrl;
-            a.download = 'merged.pdf'; // Nome do arquivo gerado
-            a.click();
-            URL.revokeObjectURL(downloadUrl);
+        if (data.success) {
+            // Redirecionar para a página de download
+            window.location.href = data.redirectUrl;
         } else {
-            throw new Error('Formato de resposta inesperado.');
+            alert('Erro ao mesclar PDFs.');
         }
-
     } catch (error) {
         console.error('Erro:', error);
         alert('Erro ao mesclar PDFs.');
