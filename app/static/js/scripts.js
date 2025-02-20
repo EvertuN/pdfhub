@@ -1,32 +1,25 @@
 document.addEventListener('DOMContentLoaded', function () {
     const themeSwitch = document.getElementById('themeSwitch');
     const themeIcon = document.getElementById('themeIcon');
-    const themeText = document.getElementById('themeText');
 
-    // Verificar o tema salvo no localStorage
-    const savedTheme = localStorage.getItem('theme');
-    if (savedTheme === 'theme-dark') {
-        document.body.classList.add('theme-dark');
-        themeSwitch.checked = true;
-        themeIcon.textContent = '🌙';
-    } else {
-        document.body.classList.add('theme-light');
-        themeSwitch.checked = false;
-        themeIcon.textContent = '☀️';
-    }
+    function applyTheme(theme) {
+        document.body.classList.remove('theme-light', 'theme-dark');
+        document.body.classList.add(theme);
+        localStorage.setItem('theme', theme);
 
-    // Alternar o tema quando o switch é clicado
-    themeSwitch.addEventListener('change', function () {
-        if (this.checked) {
-            document.body.classList.remove('theme-light');
-            document.body.classList.add('theme-dark');
-            localStorage.setItem('theme', 'theme-dark');
+        if (theme === 'theme-dark') {
+            themeSwitch.checked = true;
             themeIcon.textContent = '🌙';
         } else {
-            document.body.classList.remove('theme-dark');
-            document.body.classList.add('theme-light');
-            localStorage.setItem('theme', 'theme-light');
+            themeSwitch.checked = false;
             themeIcon.textContent = '☀️';
         }
+    }
+
+    const savedTheme = localStorage.getItem('theme') || 'theme-light'; // Padrão: tema claro
+    applyTheme(savedTheme);
+
+    themeSwitch.addEventListener('change', function () {
+        applyTheme(this.checked ? 'theme-dark' : 'theme-light');
     });
 });

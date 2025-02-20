@@ -4,10 +4,8 @@
 <h2>Juntar PDF</h2>
 <p>Adicione os PDF, arraste para reordenar e ajuste conforme necessário.</p>
 
-<form id="mergeForm" data-url="{{ url_for('merge_pdf.merge_pdf') }}"
-      data-rotate-url="{{ url_for('merge_pdf.rotate_pdf') }}">    <!-- Campos do formulário -->
+<form id="mergeForm" data-url="{{ url_for('merge_pdf.merge_pdf') }}">
     <div class="form-group">
-        <!--        <input type="file" name="files" id="fileInput" multiple accept="application/pdf" class="form-control-file" style="display: none;">-->
         <input type="file" id="fileInput" multiple style="display: none;">
         <button type="button" id="addFilesBtn" class="btn btn-primary mb-3">
             <i class="fas fa-plus"></i> Adicionar Arquivos
@@ -27,7 +25,6 @@
     </button>
 </form>
 
-<!-- Template para cada PDF no preview -->
 <template id="pdfTemplate">
     <div class="pdf-item card m-2" style="width: 150px;">
         <div class="card-body text-center">
@@ -37,11 +34,17 @@
                 <button type="button" class="btn btn-danger btn-sm delete-pdf">
                     <i class="fas fa-trash"></i>
                 </button>
-
+                <button type="button" class="btn btn-warning btn-sm rotate-pdf">
+                    <i class="fas fa-sync"></i>
+                </button>
             </div>
         </div>
     </div>
 </template>
+
+<script>
+    var rotatePdfUrl = "{{ url_for('merge_pdf.rotate_pdf') }}";
+</script>
 
 <script src="{{ url_for('static', filename='js/merge_pdf.js') }}"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>

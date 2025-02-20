@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>Dividir PDF</h2>
+<p>Adicione um arquivo PDF e escolha como deseja dividi-lo.</p>
+
+<form id="splitForm" method="POST" enctype="multipart/form-data" data-url="{{ url_for('split_pdf.split_pdf') }}">
+    <div class="form-group">
+        <input type="file" id="fileInput" style="display: none;">
+        <button type="button" id="addFileBtn" class="btn btn-primary mb-3">
+            <i class="fas fa-file-upload"></i> Adicionar Arquivo
+        </button>
+    </div>
+
+    <!-- Opções de Divisão -->
+    <div class="btn-group mb-3" data-toggle="buttons">
+        <label class="btn btn-outline-primary active">
+            <input type="radio" name="splitOption" id="extractAll" value="all" checked> Extrair Todas
+        </label>
+        <label class="btn btn-outline-primary">
+            <input type="radio" name="splitOption" id="selectPages" value="select"> Selecionar Páginas
+        </label>
+    </div>
+
+    <!-- Preview das Páginas -->
+    <div id="pdfPreview" class="d-flex flex-wrap mb-3" style="display: none;">
+        <!-- As páginas do PDF serão adicionadas dinamicamente aqui -->
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        <i class="fas fa-scissors"></i> Dividir PDF
+    </button>
+</form>
+
+<template id="pageTemplate">
+    <div class="pdf-page-item card m-2" style="width: 150px; cursor: pointer;">
+        <div class="card-body text-center">
+            <canvas class="pdf-preview mb-2" style="width: 100%; height: 150px;"></canvas>
+            <p class="card-text">Página <span class="page-number"></span></p>
+        </div>
+    </div>
+</template>
+
+<script src="{{ url_for('static', filename='js/split_pdf.js') }}"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.min.js"></script>
+{% endblock %}

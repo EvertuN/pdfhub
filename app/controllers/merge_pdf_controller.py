@@ -52,7 +52,7 @@ def delete_file():
 @merge_pdf_bp.route('/rotate-pdf', methods=['POST'])
 def rotate_pdf():
     file = request.files['file']
-    # angle = int(request.form.get('angle', 90))
+    angle = int(request.form.get('angle', 90))  # Girar 90 graus por padrão
 
     # Ler o PDF
     reader = PdfReader(file)
@@ -68,7 +68,7 @@ def rotate_pdf():
     writer.write(output)
     output.seek(0)
 
-    # Retornar o arquivo girado para download
+    # Retornar o PDF girado como resposta
     return send_file(
         output,
         mimetype='application/pdf',

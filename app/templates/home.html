@@ -8,9 +8,20 @@
         <div class="col-md-3 col-sm-6 mb-4">
             <a href="{{ url_for('merge_pdf.merge_pdf') }}" class="card text-center h-100">
                 <div class="card-body">
-                    <i class="fas fa-file-pdf fa-3x mb-3"></i> <!-- Ícone -->
+                    <i class="fa-solid fa-down-left-and-up-right-to-center fa-3x mb-3"></i> <!-- Ícone -->
                     <h5 class="card-title">Juntar PDF</h5> <!-- Título -->
                     <p class="card-text">Combine vários PDFs em um único arquivo.</p> <!-- Subtítulo -->
+                </div>
+            </a>
+        </div>
+
+        <!-- Dividir PDF -->
+        <div class="col-md-3 col-sm-6 mb-4">
+            <a href="{{ url_for('split_pdf.split_pdf') }}" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-up-right-and-down-left-from-center fa-3x mb-3"></i><!-- Ícone -->
+                    <h5 class="card-title">Dividir PDF</h5> <!-- Título -->
+                    <p class="card-text">Divida o PDF em vários arquivos únicos.</p> <!-- Subtítulo -->
                 </div>
             </a>
         </div>
