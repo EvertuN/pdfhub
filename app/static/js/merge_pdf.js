@@ -7,22 +7,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
     let pdfFiles = [];
 
-    // Função para adicionar arquivos ao preview
-// Função para adicionar arquivos ao preview
 function addFiles(files) {
     for (const file of files) {
         const clone = document.importNode(pdfTemplate, true);
         clone.querySelector('.pdf-name').textContent = file.name;
 
-        // Renderizar a primeira página do PDF
+
         const canvas = clone.querySelector('.pdf-preview');
         renderPDFPreview(file, canvas);
 
         clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
-            const card = event.target.closest('.pdf-item'); // Encontra o elemento .pdf-item pai
+            const card = event.target.closest('.pdf-item');
             if (card) {
-                card.remove(); // Remove o card do DOM
-                pdfFiles = pdfFiles.filter(f => f.name !== file.name); // Remove o arquivo do array
+                card.remove();
+                pdfFiles = pdfFiles.filter(f => f.name !== file.name);
             }
         });
 
@@ -30,10 +28,10 @@ function addFiles(files) {
         pdfFiles.push(file);
     }
 }
-// Configurar o worker do PDF.js
+
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
 
-// Função para renderizar a primeira página do PDF
+
 function renderPDFPreview(file, canvas) {
     const fileReader = new FileReader();
     fileReader.onload = function () {
