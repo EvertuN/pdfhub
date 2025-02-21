@@ -109,4 +109,4 @@ def download():
         return render_template("download.html", success=False, message="Nenhum arquivo disponível para download.")
 
     # Renderiza o template de download com o link do arquivo
-    return render_template("download.html", success=True, download_url=download_url, file_type="o PDF dividido")
+    return render_template("download.html", success=True, download_url=download_url, file_type="PDF dividido")

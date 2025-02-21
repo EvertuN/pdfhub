@@ -99,34 +99,21 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
         return;
     }
 
-    const pdfItems = document.querySelectorAll('.pdf-item');
-    pdfFiles = Array.from(pdfItems).map(item => {
-        const fileName = item.querySelector('.pdf-name').textContent;
-        return pdfFiles.find(f => f.name === fileName);
-    }).filter(Boolean); // Remover valores undefined
-
     const formData = new FormData();
-    pdfFiles.forEach((file) => {
-        formData.append('files', file);
-    });
-
-    const url = document.querySelector('#mergeForm').dataset.url;
+    pdfFiles.forEach(file => formData.append('files', file)); // Adiciona os arquivos ao formulário
 
     try {
-        const response = await fetch(url, {
-            method: 'POST',
-            body: formData,
-        });
-        const data = await response.json();
+        const response = await fetch(this.getAttribute('data-url'), { method: 'POST', body: formData });
+        const result = await response.json();
 
-        if (data.success) {
-            window.location.href = data.redirectUrl;
+        if (result.success) {
+            window.location.href = result.redirectUrl; // Agora redireciona para a URL específica do merge
         } else {
-            alert('Erro ao mesclar PDFs.');
+            alert(result.message || 'Erro ao mesclar PDFs.');
         }
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao mesclar PDFs.');
+        console.error('Erro ao mesclar PDFs:', error);
+        alert('Erro inesperado. Por favor, tente novamente.');
     }
 });
 

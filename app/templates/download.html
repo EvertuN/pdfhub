@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container text-center mt-5">
-    <h2>Download</h2>
+    <h2>{{ file_type }}</h2>
     <p>Seu arquivo está pronto para ser baixado.</p>
 
     <div class="d-flex justify-content-center align-items-center gap-3">
@@ -14,12 +14,11 @@
             <i class="fas fa-download"></i> Baixar {{ file_type }}
         </a>
         &nbsp&nbsp
-        <button id="deleteFileBtn" class="btn btn-danger rounded-circle">
+        <button id="deleteFileBtn" class="btn btn-danger rounded-circle" data-filename="temp_merged.pdf" data-type="{{ file_type }}">
             <i class="fas fa-trash"></i>
         </button>
     </div>
 </div>
 
-<!-- Incluir o script externo -->
 <script src="{{ url_for('static', filename='js/download.js') }}"></script>
 {% endblock %}

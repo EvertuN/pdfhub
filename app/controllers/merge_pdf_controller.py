@@ -19,19 +19,23 @@ def merge_pdf():
         with open(temp_path, 'wb') as f:
             f.write(output.getvalue())
 
+        # Especifica uma URL de download para o merge
         return jsonify({
             'success': True,
-            'redirectUrl': url_for('merge_pdf.download', file_type='PDF Mesclados'),
+            'redirectUrl': url_for('merge_pdf.merged_download', _external=True),  # Específica para o merge
         })
 
     return render_template('merge_pdf.html')
 
 
-@merge_pdf_bp.route('/download')
-def download():
-    file_type = request.args.get('file_type', 'Arquivo')
+@merge_pdf_bp.route('/merged-download')
+def merged_download():
+    file_path = os.path.join('app/static/uploads', 'temp_merged.pdf')
+    if not os.path.exists(file_path):
+        return render_template("download.html", success=False, message="Nenhum arquivo disponível para download.")
+
     download_url = url_for('static', filename='uploads/temp_merged.pdf', _external=True)
-    return render_template('download.html', download_url=download_url, file_type=file_type)
+    return render_template("download.html", success=True, download_url=download_url, file_type='PDF Mesclados')
 
 @merge_pdf_bp.route('/delete-file', methods=['POST'])
 def delete_file():
