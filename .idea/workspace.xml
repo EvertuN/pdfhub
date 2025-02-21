@@ -8,9 +8,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/controllers/split_pdf_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/split_pdf_controller.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/js/download.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/download.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/js/merge_pdf.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/merge_pdf.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/temp_merged.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/uploads/temp_merged.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/templates/download.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/download.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

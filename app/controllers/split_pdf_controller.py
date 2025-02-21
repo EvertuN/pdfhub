@@ -46,32 +46,25 @@ def process_split():
         return jsonify({'success': False, 'message': 'Arquivo não encontrado.'}), 400
 
     try:
-        # Ler o arquivo PDF original
         reader = PdfReader(file_path)
         base_name = os.path.splitext(file_name)[0]
 
-        # Criar um buffer ZIP em memória
         zip_file_path = os.path.join(OUTPUT_FOLDER, f"{base_name}_dividido.zip")
 
         with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
             if split_option == 'all':
-                # Gerar um PDF para cada página
                 for i, page in enumerate(reader.pages):
                     writer = PdfWriter()
                     writer.add_page(page)
 
-                    # Criar um buffer para o PDF da página
                     pdf_buffer = io.BytesIO()
                     writer.write(pdf_buffer)
                     pdf_buffer.seek(0)
 
-                    # Nome do arquivo no ZIP
                     page_filename = f"{base_name}_pagina_{i + 1}.pdf"
 
-                    # Adicionar ao ZIP
                     zip_file.writestr(page_filename, pdf_buffer.getvalue())
             else:
-                # Criar PDFs individuais para as páginas selecionadas
                 selected_pages = [int(p) - 1 for p in selected_pages.split(',') if p.isdigit()]
 
                 for i, page_index in enumerate(selected_pages):
@@ -79,34 +72,27 @@ def process_split():
                         writer = PdfWriter()
                         writer.add_page(reader.pages[page_index])
 
-                        # Criar um buffer para o PDF da página
                         pdf_buffer = io.BytesIO()
                         writer.write(pdf_buffer)
                         pdf_buffer.seek(0)
 
-                        # Nome do arquivo no ZIP
                         page_filename = f"{base_name}_pagina_{page_index + 1}.pdf"
 
-                        # Adicionar ao ZIP
                         zip_file.writestr(page_filename, pdf_buffer.getvalue())
 
-        # Gerar link de download e redirecionar
         download_url = url_for("static", filename=f"output/{base_name}_dividido.zip", _external=True)
         return jsonify({'success': True, 'redirect_url': url_for('split_pdf.download', download_url=download_url)})
 
     except Exception as e:
-        # Pleno controle de erros para diagnóstico
         print(f"Erro ao processar PDF: {e}")
         return jsonify({'success': False, 'message': 'Erro ao processar o PDF: ' + str(e)}), 500
 
 
 @split_pdf_bp.route('/download', methods=['GET'])
 def download():
-    # Pega a URL do arquivo a ser baixado (via query string)
     download_url = request.args.get('download_url', None)
 
     if not download_url:
         return render_template("download.html", success=False, message="Nenhum arquivo disponível para download.")
 
-    # Renderiza o template de download com o link do arquivo
-    return render_template("download.html", success=True, download_url=download_url, file_type="PDF dividido")
+    return render_template("download.html", success=True, download_url=download_url, file_title="O PDF foi dividido!",file_type="PDF dividido")

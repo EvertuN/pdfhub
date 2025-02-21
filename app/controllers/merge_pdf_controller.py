@@ -35,7 +35,9 @@ def merged_download():
         return render_template("download.html", success=False, message="Nenhum arquivo disponível para download.")
 
     download_url = url_for('static', filename='uploads/temp_merged.pdf', _external=True)
-    return render_template("download.html", success=True, download_url=download_url, file_type='PDF Mesclados')
+    return render_template("download.html", success=True, download_url=download_url,
+                           file_title="Os PDFs foram combinados!", file_type='o PDF combinado')
+
 
 @merge_pdf_bp.route('/delete-file', methods=['POST'])
 def delete_file():
@@ -79,6 +81,7 @@ def rotate_pdf():
         as_attachment=True,
         download_name='rotated.pdf'
     )
+
 
 @merge_pdf_bp.route('/download-rotated', methods=['GET'])
 def download_rotated():
