@@ -1,12 +1,24 @@
-from flask import request, jsonify, send_file, Blueprint
+from flask import Blueprint, render_template, request, jsonify, send_file, url_for
 from PyPDF2 import PdfReader, PdfWriter
+import os
 import io
+import zipfile
 
-split_pdf_bp = Blueprint('split_pdf', __name__)
+split_pdf_bp = Blueprint('split_pdf', __name__, template_folder='../templates')
 
-@split_pdf_bp.route('/split-pdf', methods=['POST'])
+UPLOAD_FOLDER = "app/static/uploads"
+OUTPUT_FOLDER = "app/static/output"
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(OUTPUT_FOLDER, exist_ok=True)
+
+
+@split_pdf_bp.route('/split-pdf', methods=['GET'])
 def split_pdf():
-    print(f"Recebido método: {request.method}")  # Log para depuração
+    return render_template('split_pdf.html')
+
+
+@split_pdf_bp.route('/upload-pdf', methods=['POST'])
+def upload_pdf():
     if 'file' not in request.files:
         return jsonify({'success': False, 'message': 'Nenhum arquivo enviado.'}), 400
 
@@ -14,67 +26,87 @@ def split_pdf():
     if file.filename == '':
         return jsonify({'success': False, 'message': 'Nenhum arquivo selecionado.'}), 400
 
-    print(f"Arquivo recebido: {file.filename}")
-    filename = file.filename[:50]  # Pega os primeiros 50 caracteres do nome original
-    split_option = request.form.get('splitOption')  # 'all' ou 'select'
-    selected_pages = request.form.get('selectedPages', '').split(',')  # Páginas selecionadas
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(file_path)
 
-    print(f"Opção de divisão: {split_option}")
-    print(f"Páginas selecionadas: {selected_pages}")
+    reader = PdfReader(file_path)
+    num_pages = len(reader.pages)
 
-    # Ler o PDF
-    reader = PdfReader(file)
-
-    if split_option == 'all':
-        # Criar múltiplos PDFs, um para cada página
-        files = []
-        for i in range(len(reader.pages)):
-            writer = PdfWriter()
-            writer.add_page(reader.pages[i])
-
-            output = io.BytesIO()
-            writer.write(output)
-            output.seek(0)
-
-            page_filename = f"{filename}_pagina_{i+1}.pdf"
-            files.append((page_filename, output))
-
-        return send_multiple_files(files)
-    else:
-        # Criar um único PDF com as páginas selecionadas
-        writer = PdfWriter()
-        for page_num in selected_pages:
-            if page_num.isdigit():
-                page_index = int(page_num) - 1
-                if 0 <= page_index < len(reader.pages):
-                    writer.add_page(reader.pages[page_index])
-
-        output = io.BytesIO()
-        writer.write(output)
-        output.seek(0)
-
-        return send_file(
-            output,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name=f"{filename}_selecionado.pdf"
-        )
+    return jsonify({'success': True, 'fileName': file.filename, 'numPages': num_pages})
 
 
-def send_multiple_files(files):
-    """Cria um ZIP para enviar múltiplos arquivos"""
-    import zipfile
+@split_pdf_bp.route('/process-split', methods=['POST'])
+def process_split():
+    file_name = request.form.get('fileName')
+    split_option = request.form.get('splitOption')
+    selected_pages = request.form.get('selectedPages', '')
 
-    zip_buffer = io.BytesIO()
-    with zipfile.ZipFile(zip_buffer, "w") as zip_file:
-        for file_name, file_data in files:
-            zip_file.writestr(file_name, file_data.getvalue())
+    file_path = os.path.join(UPLOAD_FOLDER, file_name)
+    if not os.path.exists(file_path):
+        return jsonify({'success': False, 'message': 'Arquivo não encontrado.'}), 400
 
-    zip_buffer.seek(0)
+    try:
+        # Ler o arquivo PDF original
+        reader = PdfReader(file_path)
+        base_name = os.path.splitext(file_name)[0]
 
-    return send_file(
-        zip_buffer,
-        mimetype="application/zip",
-        as_attachment=True,
-        download_name="arquivos_divididos.zip"
-    )
+        # Criar um buffer ZIP em memória
+        zip_file_path = os.path.join(OUTPUT_FOLDER, f"{base_name}_dividido.zip")
+
+        with zipfile.ZipFile(zip_file_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
+            if split_option == 'all':
+                # Gerar um PDF para cada página
+                for i, page in enumerate(reader.pages):
+                    writer = PdfWriter()
+                    writer.add_page(page)
+
+                    # Criar um buffer para o PDF da página
+                    pdf_buffer = io.BytesIO()
+                    writer.write(pdf_buffer)
+                    pdf_buffer.seek(0)
+
+                    # Nome do arquivo no ZIP
+                    page_filename = f"{base_name}_pagina_{i + 1}.pdf"
+
+                    # Adicionar ao ZIP
+                    zip_file.writestr(page_filename, pdf_buffer.getvalue())
+            else:
+                # Criar PDFs individuais para as páginas selecionadas
+                selected_pages = [int(p) - 1 for p in selected_pages.split(',') if p.isdigit()]
+
+                for i, page_index in enumerate(selected_pages):
+                    if 0 <= page_index < len(reader.pages):
+                        writer = PdfWriter()
+                        writer.add_page(reader.pages[page_index])
+
+                        # Criar um buffer para o PDF da página
+                        pdf_buffer = io.BytesIO()
+                        writer.write(pdf_buffer)
+                        pdf_buffer.seek(0)
+
+                        # Nome do arquivo no ZIP
+                        page_filename = f"{base_name}_pagina_{page_index + 1}.pdf"
+
+                        # Adicionar ao ZIP
+                        zip_file.writestr(page_filename, pdf_buffer.getvalue())
+
+        # Gerar link de download e redirecionar
+        download_url = url_for("static", filename=f"output/{base_name}_dividido.zip", _external=True)
+        return jsonify({'success': True, 'redirect_url': url_for('split_pdf.download', download_url=download_url)})
+
+    except Exception as e:
+        # Pleno controle de erros para diagnóstico
+        print(f"Erro ao processar PDF: {e}")
+        return jsonify({'success': False, 'message': 'Erro ao processar o PDF: ' + str(e)}), 500
+
+
+@split_pdf_bp.route('/download', methods=['GET'])
+def download():
+    # Pega a URL do arquivo a ser baixado (via query string)
+    download_url = request.args.get('download_url', None)
+
+    if not download_url:
+        return render_template("download.html", success=False, message="Nenhum arquivo disponível para download.")
+
+    # Renderiza o template de download com o link do arquivo
+    return render_template("download.html", success=True, download_url=download_url, file_type="o PDF dividido")

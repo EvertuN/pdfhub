@@ -1,119 +1,164 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const fileInput = document.getElementById('fileInput');
-    const addFileBtn = document.getElementById('addFileBtn');
-    const splitForm = document.getElementById('splitForm');
-    const extractAll = document.getElementById('extractAll');
-    const selectPages = document.getElementById('selectPages');
-    const pdfPreview = document.getElementById('pdfPreview');
-
-    let pdfFile = null;
-    let selectedPages = new Set();
-
-    addFileBtn.addEventListener('click', () => fileInput.click());
-
-    fileInput.addEventListener('change', async (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-
-        pdfFile = file;
-        const reader = new FileReader();
-
-        reader.onload = async function () {
-            const typedArray = new Uint8Array(this.result);
-            const pdf = await pdfjsLib.getDocument(typedArray).promise;
-            pdfPreview.innerHTML = '';
-
-            for (let i = 1; i <= pdf.numPages; i++) {
-                const page = await pdf.getPage(i);
-                const scale = 0.5;
-                const viewport = page.getViewport({ scale });
-
-                const canvas = document.createElement('canvas');
-                const context = canvas.getContext('2d');
-                canvas.width = viewport.width;
-                canvas.height = viewport.height;
-
-                const renderTask = page.render({ canvasContext: context, viewport });
-                await renderTask.promise;
-
-                const pageContainer = document.createElement('div');
-                pageContainer.classList.add('pdf-page', 'm-2', 'border', 'rounded');
-                pageContainer.style.cursor = 'pointer';
-                pageContainer.dataset.page = i;
-
-                pageContainer.appendChild(canvas);
-                pdfPreview.appendChild(pageContainer);
-
-                pageContainer.addEventListener('click', () => {
-                    if (selectedPages.has(i)) {
-                        selectedPages.delete(i);
-                        pageContainer.classList.remove('selected');
-                    } else {
-                        selectedPages.add(i);
-                        pageContainer.classList.add('selected');
-                    }
-                });
-            }
-        };
-
-        reader.readAsArrayBuffer(file);
-    });
-
-    extractAll.addEventListener('change', () => {
-        pdfPreview.classList.add('disabled');
-        selectedPages.clear();
-        document.querySelectorAll('.pdf-page').forEach(el => el.classList.remove('selected'));
-    });
-
-    selectPages.addEventListener('change', () => {
-        pdfPreview.classList.remove('disabled');
-    });
-
-    splitForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (!pdfFile) {
-        alert('Por favor, adicione um arquivo PDF.');
+document.getElementById("pdfFileInput").addEventListener("change", function () {
+    let fileInput = document.getElementById("pdfFileInput");
+    if (fileInput.files.length === 0) {
+        alert("Selecione um arquivo PDF!");
         return;
     }
 
-    const formData = new FormData();
-    formData.append('file', pdfFile);
-    formData.append('splitOption', extractAll.checked ? 'all' : 'select');
+    let formData = new FormData();
+    formData.append("file", fileInput.files[0]);
 
-    if (!extractAll.checked) {
-        const selectedPages = Array.from(document.querySelectorAll('.pdf-page.selected'))
-            .map(el => el.dataset.page);
-        if (selectedPages.length === 0) {
-            alert('Por favor, selecione pelo menos uma página.');
-            return;
+    fetch("/upload-pdf", { method: "POST", body: formData })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById("previewContainer").classList.remove("d-none");
+                document.getElementById("buttonContainer").classList.remove("d-none");
+                document.getElementById("uploadBtn").style.display = "none";
+                renderPreview(fileInput.files[0], data.numPages);
+            } else {
+                alert(data.message);
+            }
+        });
+});
+
+function renderPreview(file, numPages) {
+    let previewContainer = document.getElementById("previewPages");
+    previewContainer.innerHTML = "";
+
+    const fileReader = new FileReader();
+    fileReader.onload = async function () {
+        const typedArray = new Uint8Array(this.result);
+        const pdf = await pdfjsLib.getDocument(typedArray).promise;
+
+        for (let i = 1; i <= numPages; i++) {
+            const page = await pdf.getPage(i);
+
+            const viewport = page.getViewport({ scale: 1 });
+            const scale = 150 / viewport.width;
+            const scaledViewport = page.getViewport({ scale });
+
+            const canvas = document.createElement("canvas");
+            const context = canvas.getContext("2d");
+            canvas.width = scaledViewport.width;
+            canvas.height = scaledViewport.height;
+
+            const renderTask = page.render({ canvasContext: context, viewport: scaledViewport });
+            await renderTask.promise;
+
+            const pageDiv = document.createElement("div");
+            pageDiv.classList.add("page-preview", "selected"); // Adiciona 'selected' por padrão
+            pageDiv.dataset.page = i;
+
+            const canvasWrapper = document.createElement("div");
+            canvasWrapper.classList.add("canvas-wrapper");
+            canvasWrapper.appendChild(canvas);
+
+            const pageNumber = document.createElement("p");
+            pageNumber.textContent = `Página ${i}`;
+
+            const selectedIcon = document.createElement("i");
+            selectedIcon.classList.add("fas", "fa-check-circle", "selected-icon");
+
+            pageDiv.appendChild(selectedIcon);
+            pageDiv.appendChild(canvasWrapper);
+            pageDiv.appendChild(pageNumber);
+            previewContainer.appendChild(pageDiv);
+
+            // Permite ao usuário alternar a seleção manualmente caso deseje mudar
+            pageDiv.addEventListener("click", () => {
+                pageDiv.classList.toggle("selected");
+            });
         }
-        formData.append('selectedPages', selectedPages.join(','));
+    };
+
+    fileReader.readAsArrayBuffer(file);
+}
+
+document.getElementById("splitAllBtn").addEventListener("click", function () {
+    // Marcar visualmente todas as páginas como selecionadas
+    document.querySelectorAll(".page-preview").forEach(el => el.classList.add("selected"));
+});
+
+document.getElementById("splitSelectedBtn").addEventListener("click", function () {
+    document.querySelectorAll(".page-preview").forEach(el => el.classList.remove("selected"));
+});
+
+document.getElementById("confirmSplitBtn").addEventListener("click", async function () {
+    let selectedPages = [...document.querySelectorAll(".page-preview.selected")].map(el => el.dataset.page).join(",");
+    if (selectedPages.length === 0) {
+        alert("Selecione pelo menos uma página!");
+        return;
     }
 
     try {
-        console.log("Enviando requisição para /split-pdf");
-        const response = await fetch(splitPdfUrl, { // Use a variável splitPdfUrl
-            method: 'POST', // Método POST
-            body: formData
+        const response = await fetch("/process-split", {
+            method: "POST",
+            body: new URLSearchParams({
+                fileName: document.getElementById("pdfFileInput").files[0].name,
+                splitOption: "select",
+                selectedPages
+            }),
         });
 
-        if (!response.ok) {
-            throw new Error('Erro ao dividir PDF.');
+        const result = await response.json();
+        if (result.success) {
+            // Redirecionar para a página de download
+            window.location.href = result.redirect_url;
+        } else {
+            alert(result.message || "Erro ao processar o PDF.");
         }
-
-        // Criar um link para o arquivo PDF e forçar o download
-        const blob = await response.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'split.pdf';
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao dividir PDF.');
+        console.error("Erro ao dividir o PDF:", error);
+        alert("Erro inesperado. Por favor, tente novamente.");
     }
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const splitAllBtn = document.getElementById("splitAllBtn");
+    const splitSelectedBtn = document.getElementById("splitSelectedBtn");
+
+    function toggleActiveButton(selectedButton) {
+        splitAllBtn.classList.remove("active");
+        splitSelectedBtn.classList.remove("active");
+        selectedButton.classList.add("active");
+    }
+
+    toggleActiveButton(splitAllBtn);
+
+    splitAllBtn.addEventListener("click", () => {
+        toggleActiveButton(splitAllBtn);
+    });
+
+    splitSelectedBtn.addEventListener("click", () => {
+        toggleActiveButton(splitSelectedBtn);
+    });
+});
+
+document.addEventListener("DOMContentLoaded", () => {
+    const pdfFileInput = document.getElementById("pdfFileInput");
+    const uploadCard = pdfFileInput.closest(".card");
+
+    pdfFileInput.addEventListener("change", function () {
+        if (pdfFileInput.files.length > 0) {
+            uploadCard.style.display = "none";
+            document.getElementById("previewContainer").classList.remove("d-none");
+            document.getElementById("buttonContainer").classList.remove("d-none");
+        } else {
+            alert("Nenhum arquivo foi selecionado!");
+        }
+    });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const splitAllBtn = document.getElementById("splitAllBtn");
+    const splitSelectedBtn = document.getElementById("splitSelectedBtn");
+    const previewContainer = document.getElementById("previewPages");
+
+    previewContainer.addEventListener("click", function () {
+        if (splitAllBtn.classList.contains("active")) {
+            splitAllBtn.classList.remove("active");
+            splitSelectedBtn.classList.add("active");
+        }
+    });
 });
