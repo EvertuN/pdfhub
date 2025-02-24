@@ -10,9 +10,24 @@ merge_pdf_bp = Blueprint('merge_pdf', __name__)
 def merge_pdf():
     if request.method == 'POST':
         files = request.files.getlist('files')
+        rotations = request.form.getlist('rotations')  # Recebe a lista de ângulos
+
+        if len(files) != len(rotations):
+            return jsonify({'success': False, 'message': 'Erro: Descompasso entre arquivos e rotações.'})
 
         output = io.BytesIO()
-        merge_pdfs(files, output)
+        writer = PdfWriter()
+
+        # Aplicar a rotação ao combinar os PDFs
+        for i, file in enumerate(files):
+            reader = PdfReader(file)
+            rotation = int(rotations[i])  # ângulo de rotação correspondente
+
+            for page in reader.pages:
+                page.rotate(rotation)  # Aplica a rotação na página
+                writer.add_page(page)
+
+        writer.write(output)
         output.seek(0)
 
         temp_path = os.path.join('app/static/uploads', 'temp_merged.pdf')
@@ -23,6 +38,7 @@ def merge_pdf():
             'success': True,
             'redirectUrl': url_for('merge_pdf.merged_download', _external=True),
         })
+
 
     return render_template('merge_pdf.html')
 

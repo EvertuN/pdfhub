@@ -100,20 +100,28 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
     }
 
     const formData = new FormData();
-    pdfFiles.forEach(file => formData.append('files', file)); // Adiciona os arquivos ao formulário
+
+    // Inclua tanto o arquivo quanto o ângulo de rotação no envio
+    pdfFiles.forEach(file => {
+        formData.append('files', file);
+        formData.append('rotations', file.rotation || 0); // Insere rotação padrão de 0 se não houver
+    });
 
     try {
-        const response = await fetch(this.getAttribute('data-url'), { method: 'POST', body: formData });
+        const response = await fetch(this.getAttribute('data-url'), {
+            method: 'POST',
+            body: formData
+        });
         const result = await response.json();
 
         if (result.success) {
-            window.location.href = result.redirectUrl; // Agora redireciona para a URL específica do merge
+            window.location.href = result.redirectUrl; // Redirecionar para download
         } else {
-            alert(result.message || 'Erro ao mesclar PDFs.');
+            alert('Erro ao combinar os PDFs.');
         }
     } catch (error) {
-        console.error('Erro ao mesclar PDFs:', error);
-        alert('Erro inesperado. Por favor, tente novamente.');
+        console.error('Erro ao realizar a requisição:', error);
+        alert('Algo deu errado ao combinar os PDFs.');
     }
 });
 
