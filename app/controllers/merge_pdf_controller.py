@@ -63,6 +63,7 @@ def rotate_pdf():
     writer = PdfWriter()
 
     for page in reader.pages:
+        # Aplicar a rotação corretamente
         page.rotate(angle)
         writer.add_page(page)
 
