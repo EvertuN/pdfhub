@@ -4,10 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="879c96d6-2fe3-4d73-8a28-69d675db035e" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/uploads/temp_merged.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/uploads/temp_merged.pdf" afterDir="false" />
-    </list>
+    <list default="true" id="879c96d6-2fe3-4d73-8a28-69d675db035e" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -41,7 +38,7 @@
     "DefaultHtmlFileTemplate": "HTML File",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
-    "git-widget-placeholder": "newbranch",
+    "git-widget-placeholder": "main",
     "last_opened_file_path": "C:/Users/TI-02/PycharmProjects/pdf-hub",
     "settings.editor.selected.configurable": "preferences.pluginManager"
   }
