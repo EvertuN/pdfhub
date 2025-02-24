@@ -8,9 +8,12 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/js/merge_pdf.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/merge_pdf.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/uploads/temp_merged.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/merge_pdf.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/merge_pdf.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/1.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/2 BELLA VISTA QUADRA  29 LOTE 17.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/2.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/3.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/copia.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/watermarked.pdf" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -48,7 +51,7 @@
     "RunOnceActivity.git.unshallow": "true",
     "git-widget-placeholder": "main",
     "last_opened_file_path": "C:/Users/TI-02/PycharmProjects/pdf-hub",
-    "settings.editor.selected.configurable": "ml.llm.LLMProjectConfigurable"
+    "settings.editor.selected.configurable": "ml.llm.LLMDataSharingConfigurable"
   }
 }]]></component>
   <component name="RecentsManager">

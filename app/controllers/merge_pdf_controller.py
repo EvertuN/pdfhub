@@ -10,7 +10,7 @@ merge_pdf_bp = Blueprint('merge_pdf', __name__)
 def merge_pdf():
     if request.method == 'POST':
         files = request.files.getlist('files')
-        rotations = request.form.getlist('rotations')  # Recebe a lista de ângulos
+        rotations = request.form.getlist('rotations')  # Recebe a lista de rotações
 
         if len(files) != len(rotations):
             return jsonify({'success': False, 'message': 'Erro: Descompasso entre arquivos e rotações.'})
@@ -18,18 +18,20 @@ def merge_pdf():
         output = io.BytesIO()
         writer = PdfWriter()
 
-        # Aplicar a rotação ao combinar os PDFs
+        # Aplicar rotação para cada PDF individualmente
         for i, file in enumerate(files):
             reader = PdfReader(file)
-            rotation = int(rotations[i])  # ângulo de rotação correspondente
+            rotation = int(rotations[i])  # Obtém a rotação do arquivo específico
 
             for page in reader.pages:
-                page.rotate(rotation)  # Aplica a rotação na página
-                writer.add_page(page)
+                if rotation % 360 != 0:  # Apenas aplica rotação se não for 0
+                    page.rotate(rotation)  # Aplica a rotação acumulada
+                writer.add_page(page)  # Adiciona a página ao PDF final
 
         writer.write(output)
         output.seek(0)
 
+        # Salva como arquivo temporário
         temp_path = os.path.join('app/static/uploads', 'temp_merged.pdf')
         with open(temp_path, 'wb') as f:
             f.write(output.getvalue())
@@ -41,6 +43,7 @@ def merge_pdf():
 
 
     return render_template('merge_pdf.html')
+
 
 
 @merge_pdf_bp.route('/merged-download')
@@ -72,24 +75,37 @@ def delete_file():
 
 @merge_pdf_bp.route('/rotate-pdf', methods=['POST'])
 def rotate_pdf():
-    file = request.files['file']
-    angle = int(request.form.get('angle', 90))
+    file = request.files.get('file')  # Obtém o arquivo enviado
 
-    reader = PdfReader(file)
-    writer = PdfWriter()
+    if not file:
+        return jsonify({'success': False, 'message': 'Nenhum arquivo enviado.'}), 400
 
-    for page in reader.pages:
-        # Aplicar a rotação corretamente
-        page.rotate(angle)
-        writer.add_page(page)
+    try:
+        angle = int(request.form.get('angle', 90))  # Obtém o ângulo com padrão 90
+    except ValueError:
+        return jsonify({'success': False, 'message': 'Ângulo inválido fornecido.'}), 400
 
-    output = io.BytesIO()
-    writer.write(output)
-    output.seek(0)
+    try:
+        reader = PdfReader(file)  # Tenta ler o arquivo como PDF
+        writer = PdfWriter()
 
-    return send_file(
-        output,
-        mimetype='application/pdf',
-        as_attachment=True,
-        download_name='rotated.pdf'
-    )
+        # Itera e aplica a rotação
+        for page in reader.pages:
+            page.rotate(angle)
+            writer.add_page(page)
+
+        # Saída como um arquivo em memória
+        output = io.BytesIO()
+        writer.write(output)
+        output.seek(0)
+
+        return send_file(
+            output,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name='rotated.pdf'
+        )
+    except Exception as e:
+        print(f"Erro ao processar arquivo para rotação: {e}")
+        return jsonify({'success': False, 'message': 'Erro interno ao processar o arquivo.'}), 500
+

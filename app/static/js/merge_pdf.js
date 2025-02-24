@@ -7,23 +7,52 @@ document.addEventListener('DOMContentLoaded', function () {
 
 let pdfFiles = [];
 
+let isRendering = false; // Controlador global para evitar múltiplos cliques
+
 function addFiles(files) {
     for (const file of files) {
         const clone = document.importNode(pdfTemplate, true);
         const uniqueId = Date.now();
-        const uniqueName = `${uniqueId}_${file.name}`; // Nome único para o arquivo
-
-        clone.querySelector('.pdf-name').textContent = file.name; // Exibe o nome original
-        file.uniqueName = uniqueName; // Armazena o nome único no objeto do arquivo
+        const uniqueName = `${uniqueId}_${file.name}`;
+        file.uniqueName = uniqueName;
 
         const canvas = clone.querySelector('.pdf-preview');
+
         renderPDFPreview(file, canvas);
 
+        // Botão de girar
+        const rotateButton = clone.querySelector('.rotate-pdf');
+        rotateButton.addEventListener('click', async function () {
+            if (isRendering) {
+                console.log("O preview está sendo atualizado, por favor, aguarde...");
+                return;
+            }
+
+            isRendering = true;
+
+            try {
+                // Incrementar rotação no objeto
+                file.rotation = (file.rotation || 0) + 90;
+                if (file.rotation >= 360) file.rotation = 0;
+
+                console.log(`Girando PDF "${file.name}" para ${file.rotation} graus.`);
+
+                // Chamada da rotação e atualização
+                await rotatePDF(file, file.rotation);
+                await renderPDFPreview(file, canvas); // Re-renderiza o preview
+            } catch (error) {
+                console.error("Erro ao girar o PDF:", error);
+            } finally {
+                isRendering = false;
+            }
+        });
+
+        // Delete do preview
         clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
-            const card = event.target.closest('.pdf-item'); // Encontra o elemento .pdf-item pai
+            const card = event.target.closest('.pdf-item');
             if (card) {
-                card.remove(); // Remove o card do DOM
-                pdfFiles = pdfFiles.filter(f => f.uniqueName !== file.uniqueName); // Remove o arquivo do array usando o nome único
+                card.remove();
+                pdfFiles = pdfFiles.filter(f => f.uniqueName !== file.uniqueName);
             }
         });
 
@@ -34,14 +63,17 @@ function addFiles(files) {
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.11.338/pdf.worker.min.js';
 
-function renderPDFPreview(file, canvas) {
+async function renderPDFPreview(file, canvas) {
     const fileReader = new FileReader();
+
     fileReader.onload = function () {
         const typedArray = new Uint8Array(this.result);
+
         pdfjsLib.getDocument(typedArray).promise.then(pdf => {
             pdf.getPage(1).then(page => {
-                const viewport = page.getViewport({ scale: 0.5 });
+                const viewport = page.getViewport({ scale: 0.5, rotation: file.rotation || 0 }); // Inclui a rotação
                 const context = canvas.getContext('2d');
+
                 canvas.height = viewport.height;
                 canvas.width = viewport.width;
 
@@ -49,13 +81,20 @@ function renderPDFPreview(file, canvas) {
                     canvasContext: context,
                     viewport: viewport,
                 };
-                page.render(renderContext);
+
+                // Renderizar o canvas
+                page.render(renderContext).promise.then(() => {
+                    console.log(`PDF "${file.name}" renderizado com ${file.rotation || 0} graus de rotação.`);
+                }).catch(error => {
+                    console.error('Erro ao renderizar o PDF:', error);
+                });
             });
         }).catch(error => {
             console.error('Erro ao carregar o PDF:', error);
             alert('Erro ao carregar o PDF. Certifique-se de que o arquivo é válido.');
         });
     };
+
     fileReader.readAsArrayBuffer(file);
 }
 
@@ -69,7 +108,7 @@ function renderPDFPreview(file, canvas) {
 sortByNameBtn.addEventListener('click', () => {
     pdfFiles.sort((a, b) => a.name.localeCompare(b.name));
 
-    pdfPreview.innerHTML = '';
+    pdfPreview.innerHTML = ''; // Limpa o preview atual para evitar duplicação
 
     pdfFiles.forEach(file => {
         const clone = document.importNode(pdfTemplate, true);
@@ -77,6 +116,17 @@ sortByNameBtn.addEventListener('click', () => {
 
         const canvas = clone.querySelector('.pdf-preview');
         renderPDFPreview(file, canvas);
+
+        clone.querySelector('.rotate-pdf').addEventListener('click', () => {
+            if (isRendering) return;
+
+            isRendering = true;
+
+            file.rotation = (file.rotation || 0) + 90;
+            if (file.rotation >= 360) file.rotation = 0;
+
+            renderPDFPreview(file, canvas).finally(() => isRendering = false);
+        });
 
         clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
             const card = event.target.closest('.pdf-item');
@@ -104,24 +154,27 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
     // Inclua tanto o arquivo quanto o ângulo de rotação no envio
     pdfFiles.forEach(file => {
         formData.append('files', file);
-        formData.append('rotations', file.rotation || 0); // Insere rotação padrão de 0 se não houver
+        formData.append('rotations', file.rotation || 0); // Adiciona rotação acumulada de cada arquivo
     });
 
     try {
-        const response = await fetch(this.getAttribute('data-url'), {
+        const response = await fetch('/merge-pdf', {
             method: 'POST',
-            body: formData
+            body: formData,
         });
-        const result = await response.json();
 
+        if (!response.ok) {
+            throw new Error('Erro ao combinar PDFs.');
+        }
+
+        const result = await response.json();
         if (result.success) {
-            window.location.href = result.redirectUrl; // Redirecionar para download
+            window.location.href = result.redirectUrl; // Redireciona para o download do arquivo combinado
         } else {
-            alert('Erro ao combinar os PDFs.');
+            alert('Erro ao processar o merge dos PDFs.');
         }
     } catch (error) {
-        console.error('Erro ao realizar a requisição:', error);
-        alert('Algo deu errado ao combinar os PDFs.');
+        console.error('Erro no merge dos PDFs:', error);
     }
 });
 
@@ -134,10 +187,15 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
         },
     });
 
-    async function rotatePDF(file, canvas) {
+async function rotatePDF(file, canvas) {
+    if (!file || !canvas) {
+        console.error("Arquivo ou canvas inválido para rotação.");
+        return;
+    }
+
     const formData = new FormData();
-    formData.append('file', file);
-    formData.append('angle', 90); // Girar 90 graus
+    formData.append('file', file);   // Adiciona o arquivo ao formulário
+    formData.append('angle', 90);   // Define o ângulo de rotação
 
     try {
         const response = await fetch(rotatePdfUrl, {
@@ -146,24 +204,28 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
         });
 
         if (!response.ok) {
-            throw new Error('Erro ao girar PDF.');
+            throw new Error('Erro no servidor ao processar rotação do PDF.');
         }
 
-        // Obter o blob do PDF girado
+        // Obter o blob (PDF girado retornado pelo backend)
         const blob = await response.blob();
-        const newFile = new File([blob], file.name, { type: 'application/pdf' });
+        const newPdfFile = new File([blob], file.name, { type: 'application/pdf' });
 
-        // Atualizar o preview com o PDF girado
-        renderPDFPreview(newFile, canvas);
+        // Atualiza o preview canvas com o arquivo modificado
+        await renderPDFPreview(newPdfFile, canvas);
 
-        // Atualizar o arquivo no array pdfFiles
-        const index = pdfFiles.findIndex(f => f.uniqueName === file.uniqueName);
-        if (index !== -1) {
-            pdfFiles[index] = newFile;
+        // Atualiza o array pdfFiles mantendo consistência no uniqueName
+        const fileIndex = pdfFiles.findIndex(f => f.uniqueName === file.uniqueName);
+        if (fileIndex !== -1) {
+            pdfFiles[fileIndex] = newPdfFile; // Atualiza o arquivo no array
+            pdfFiles[fileIndex].rotation = (pdfFiles[fileIndex].rotation || 0) + 90; // Atualiza a rotação acumulada
+        } else {
+            console.warn("Arquivo para atualização não encontrado no array.", file.name);
         }
+
+        console.log(`PDF "${file.name}" rotacionado com sucesso.`);
     } catch (error) {
-        console.error('Erro:', error);
-        alert('Erro ao girar PDF.');
+        console.error('Erro ao girar PDF:', error);
     }
 }
 
