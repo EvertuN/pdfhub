@@ -1,10 +1,9 @@
 from PyPDF2 import PdfReader, PdfWriter
-from flask import Blueprint, render_template, request, redirect, url_for, jsonify, send_file
-from app.models.pdf_model import merge_pdfs
+from PyPDF2.generic import NameObject, NumberObject
+from flask import Blueprint, render_template, request, url_for, jsonify, send_file
 import os, io
 
 merge_pdf_bp = Blueprint('merge_pdf', __name__)
-
 
 @merge_pdf_bp.route('/merge-pdf', methods=['GET', 'POST'])
 def merge_pdf():
@@ -24,9 +23,11 @@ def merge_pdf():
             rotation = int(rotations[i])  # Obtém a rotação do arquivo específico
 
             for page in reader.pages:
-                if rotation % 360 != 0:  # Apenas aplica rotação se não for 0
-                    page.rotate(rotation)  # Aplica a rotação acumulada
-                writer.add_page(page)  # Adiciona a página ao PDF final
+                # Aplica a rotação acumulada
+                current_rotation = page.get("/Rotate") or 0  # Obtém a rotação existente
+                new_rotation = (current_rotation + rotation) % 360  # Calcula rotação acumulativa
+                page.rotate(new_rotation)  # Aplica a rotação corretamente
+                writer.add_page(page)  # Adiciona ao arquivo final
 
         writer.write(output)
         output.seek(0)
@@ -44,8 +45,6 @@ def merge_pdf():
 
     return render_template('merge_pdf.html')
 
-
-
 @merge_pdf_bp.route('/merged-download')
 def merged_download():
     file_path = os.path.join('app/static/uploads', 'temp_merged.pdf')
@@ -55,7 +54,6 @@ def merged_download():
     download_url = url_for('static', filename='uploads/temp_merged.pdf', _external=True)
     return render_template("download.html", success=True, download_url=download_url,
                            file_title="Os PDFs foram combinados!", file_type='o PDF combinado')
-
 
 @merge_pdf_bp.route('/delete-file', methods=['POST'])
 def delete_file():
@@ -72,40 +70,32 @@ def delete_file():
     else:
         return jsonify({'success': False, 'message': 'Arquivo não encontrado!'})
 
-
-@merge_pdf_bp.route('/rotate-pdf', methods=['POST'])
+@merge_pdf_bp.route('/rotate_pdf', methods=['POST'])
 def rotate_pdf():
-    file = request.files.get('file')  # Obtém o arquivo enviado
-
-    if not file:
-        return jsonify({'success': False, 'message': 'Nenhum arquivo enviado.'}), 400
+    """Rota responsável por processar a rotação do PDF no servidor."""
+    from PyPDF2 import PdfReader, PdfWriter
 
     try:
-        angle = int(request.form.get('angle', 90))  # Obtém o ângulo com padrão 90
-    except ValueError:
-        return jsonify({'success': False, 'message': 'Ângulo inválido fornecido.'}), 400
+        file_name = request.form.get('file_name')  # Nome único do arquivo
+        rotation = int(request.form.get('rotation'))  # Ângulo de rotação
 
-    try:
-        reader = PdfReader(file)  # Tenta ler o arquivo como PDF
+        # Identifica o arquivo no diretório (ajuste conforme a lógica do seu sistema de arquivos)
+        input_path = f"./uploads/{file_name}"
+        output_path = f"./uploads/rotated_{file_name}"
+
+        # Rotacionar PDF
+        reader = PdfReader(input_path)
         writer = PdfWriter()
 
-        # Itera e aplica a rotação
         for page in reader.pages:
-            page.rotate(angle)
+            page.rotate(rotation)
             writer.add_page(page)
 
-        # Saída como um arquivo em memória
-        output = io.BytesIO()
-        writer.write(output)
-        output.seek(0)
+        # Salva o resultado como um novo arquivo rotacionado
+        with open(output_path, "wb") as output_file:
+            writer.write(output_file)
 
-        return send_file(
-            output,
-            mimetype='application/pdf',
-            as_attachment=True,
-            download_name='rotated.pdf'
-        )
+        # Retorna sucesso ao frontend
+        return jsonify({"status": "success", "file_name": f"rotated_{file_name}"})
     except Exception as e:
-        print(f"Erro ao processar arquivo para rotação: {e}")
-        return jsonify({'success': False, 'message': 'Erro interno ao processar o arquivo.'}), 500
-
+        return jsonify({"status": "error", "message": str(e)}), 500

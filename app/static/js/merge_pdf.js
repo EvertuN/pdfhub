@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const pdfTemplate = document.getElementById('pdfTemplate').content;
 
 let pdfFiles = [];
-
 let isRendering = false; // Controlador global para evitar múltiplos cliques
 
 function addFiles(files) {
@@ -16,36 +15,38 @@ function addFiles(files) {
         const uniqueName = `${uniqueId}_${file.name}`;
         file.uniqueName = uniqueName;
 
+        clone.querySelector('.pdf-name').textContent = file.name;
+
         const canvas = clone.querySelector('.pdf-preview');
 
         renderPDFPreview(file, canvas);
 
         // Botão de girar
         const rotateButton = clone.querySelector('.rotate-pdf');
-        rotateButton.addEventListener('click', async function () {
-            if (isRendering) {
-                console.log("O preview está sendo atualizado, por favor, aguarde...");
-                return;
-            }
+// Dentro do evento de click para rotação:
+rotateButton.addEventListener('click', async function () {
+    if (isRendering) {
+        console.log("O preview está sendo atualizado, por favor, aguarde...");
+        return;
+    }
 
-            isRendering = true;
+    isRendering = true; // Bloqueia cliques adicionais
 
-            try {
-                // Incrementar rotação no objeto
-                file.rotation = (file.rotation || 0) + 90;
-                if (file.rotation >= 360) file.rotation = 0;
+    try {
+        // Incrementar rotação no objeto associado ao arquivo
+        file.rotation = (file.rotation || 0) + 90;
+        if (file.rotation >= 360) file.rotation = 0; // Reseta ao atingir 360 graus
 
-                console.log(`Girando PDF "${file.name}" para ${file.rotation} graus.`);
+        console.log(`Rotação atualizada para ${file.rotation} graus.`);
 
-                // Chamada da rotação e atualização
-                await rotatePDF(file, file.rotation);
-                await renderPDFPreview(file, canvas); // Re-renderiza o preview
-            } catch (error) {
-                console.error("Erro ao girar o PDF:", error);
-            } finally {
-                isRendering = false;
-            }
-        });
+        // Atualização apenas do preview:
+        await renderPDFPreview(file, canvas);
+    } catch (error) {
+        console.error("Erro ao girar o PDF:", error);
+    } finally {
+        isRendering = false; // Libera novamente o recurso
+    }
+});
 
         // Delete do preview
         clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
@@ -65,13 +66,12 @@ pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs
 
 async function renderPDFPreview(file, canvas) {
     const fileReader = new FileReader();
-
     fileReader.onload = function () {
         const typedArray = new Uint8Array(this.result);
 
         pdfjsLib.getDocument(typedArray).promise.then(pdf => {
             pdf.getPage(1).then(page => {
-                const viewport = page.getViewport({ scale: 0.5, rotation: file.rotation || 0 }); // Inclui a rotação
+                const viewport = page.getViewport({ scale: 0.5, rotation: file.rotation || 0 }); // Usa a rotação do objeto file
                 const context = canvas.getContext('2d');
 
                 canvas.height = viewport.height;
@@ -82,11 +82,10 @@ async function renderPDFPreview(file, canvas) {
                     viewport: viewport,
                 };
 
-                // Renderizar o canvas
                 page.render(renderContext).promise.then(() => {
-                    console.log(`PDF "${file.name}" renderizado com ${file.rotation || 0} graus de rotação.`);
+                    console.log(`PDF "${file.name}" renderizado no preview.`);
                 }).catch(error => {
-                    console.error('Erro ao renderizar o PDF:', error);
+                    console.error('Erro ao renderizar o preview do PDF', error);
                 });
             });
         }).catch(error => {
@@ -95,7 +94,7 @@ async function renderPDFPreview(file, canvas) {
         });
     };
 
-    fileReader.readAsArrayBuffer(file);
+    fileReader.readAsArrayBuffer(file); // Trabalha com arquivo local no navegador
 }
 
     addFilesBtn.addEventListener('click', () => fileInput.click());
@@ -177,7 +176,6 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
         console.error('Erro no merge dos PDFs:', error);
     }
 });
-
 
     new Sortable(pdfPreview, {
         animation: 150,
