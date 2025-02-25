@@ -261,3 +261,13 @@ canvas {
 }
 
 /* PREVIEW PDF SPLIT FINAL */
+
+/* HoVER PARA O DROPDOWN DO BASE.HTML */
+.nav-item.dropdown:hover .dropdown-menu {
+    display: block;
+}
+/* HOVER FIM */
+
+.container {
+    max-width: 1600px;
+}

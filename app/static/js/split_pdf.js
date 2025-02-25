@@ -12,9 +12,16 @@ document.getElementById("pdfFileInput").addEventListener("change", function () {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                document.getElementById("previewContainer").classList.remove("d-none");
-                document.getElementById("buttonContainer").classList.remove("d-none");
+                // Mostra o layout principal
+                document.getElementById("mainContent").classList.remove("d-none");
+
+                // Titulo desaparece boom
+                document.getElementById("primarytitle").classList.add("d-none");
+
+                // Deixa o botão de upload oculto após a seleção
                 document.getElementById("uploadBtn").style.display = "none";
+
+                // Renderiza a pré-visualização do PDF
                 renderPreview(fileInput.files[0], data.numPages);
             } else {
                 alert(data.message);

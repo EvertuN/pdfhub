@@ -6,9 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="879c96d6-2fe3-4d73-8a28-69d675db035e" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/merge_pdf_controller.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__int__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__int__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/styles.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/styles.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/js/merge_pdf.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/merge_pdf.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/split_pdf.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/split_pdf.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/temp_mergedf.pdf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/split_pdf.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/split_pdf.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,19 +45,21 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
-    &quot;Python.merge_pdf_controller.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;last_opened_file_path&quot;: &quot;C:/Users/TI-02/PycharmProjects/pdf-hub&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;ml.llm.LLMDataSharingConfigurable&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "Python.merge_pdf_controller.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "last_opened_file_path": "C:/Users/TI-02/PycharmProjects/pdf-hub/app/controllers",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="C:\Users\TI-02\PycharmProjects\pdf-hub\app\controllers" />
+      <recent name="C:\Users\TI-02\PycharmProjects\pdf-hub\app\templates" />
       <recent name="C:\Users\TI-02\PycharmProjects\pdf-hub" />
       <recent name="C:\Users\TI-02\PycharmProjects\pub-hub\app\static\images" />
     </key>

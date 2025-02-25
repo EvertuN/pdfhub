@@ -1,11 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container">
+<div class="container" id="home_container">
     <h1 class="text-center my-4">Hub de Ferramentas PDF</h1>
+    <br>
     <div class="row">
         <!-- Juntar PDF -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('merge_pdf.merge_pdf') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fa-solid fa-down-left-and-up-right-to-center fa-3x mb-3"></i> <!-- Ícone -->
@@ -16,7 +17,7 @@
         </div>
 
         <!-- Dividir PDF -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('split_pdf.split_pdf') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fa-solid fa-up-right-and-down-left-from-center fa-3x mb-3"></i><!-- Ícone -->
@@ -26,8 +27,74 @@
             </a>
         </div>
 
+        <!-- PDF para Word -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="{{ url_for('pdf_to_word.pdf_to_word') }}" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-file-word fa-3x mb-3"></i>
+                    <h5 class="card-title">PDF para Word</h5>
+                    <p class="card-text">Transforme seus documentos PDF para Word DOCX.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- PDF para Excel -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="#" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-file-excel fa-3x mb-3"></i>
+                    <h5 class="card-title">PDF para Excel</h5>
+                    <p class="card-text">Retire os dados do seu PDF para uma planilha Excel.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- PDF para JPG -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="#" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-file-image fa-3x mb-3"></i>
+                    <h5 class="card-title">PDF para JPG</h5>
+                    <p class="card-text">Transforme seu PDF em uma Imagem JPG.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- PDF para XML -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="#" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-file-code fa-3x mb-3"></i>
+                    <h5 class="card-title">PDF para XML</h5>
+                    <p class="card-text">Transforme seu PDF em um documento XML.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- PDF para PowerPoint -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="#" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fa-solid fa-file-powerpoint fa-3x mb-3"></i>
+                    <h5 class="card-title">PDF para PowerPoint</h5>
+                    <p class="card-text">Transforme seu PDF em um PowerPoint PPTX.</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Assinar Digitalmente -->
+        <div class="col-md-2 col-sm-6 mb-4">
+            <a href="#" class="card text-center h-100">
+                <div class="card-body">
+                    <i class="fas fa-file-signature fa-3x mb-3"></i>
+                    <h5 class="card-title">Assinar Digitalmente</h5>
+                    <p class="card-text">Adicione uma assinatura digital ao PDF.</p>
+                </div>
+            </a>
+        </div>
+
         <!-- Extrair Texto -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('extract_text.extract_text') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-file-alt fa-3x mb-3"></i>
@@ -38,7 +105,7 @@
         </div>
 
         <!-- PDF para Imagem -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('pdf_to_image.pdf_to_image') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-image fa-3x mb-3"></i>
@@ -49,7 +116,7 @@
         </div>
 
         <!-- Imagem para PDF -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('image_to_pdf.image_to_pdf') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-file-pdf fa-3x mb-3"></i>
@@ -60,7 +127,7 @@
         </div>
 
         <!-- Adicionar Watermark -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('watermark.watermark') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-tint fa-3x mb-3"></i>
@@ -71,7 +138,7 @@
         </div>
 
         <!-- Reduzir Tamanho do PDF -->
-        <div class="col-md-3 col-sm-6 mb-4">
+        <div class="col-md-2 col-sm-6 mb-4">
             <a href="{{ url_for('compress_pdf.compress_pdf') }}" class="card text-center h-100">
                 <div class="card-body">
                     <i class="fas fa-compress fa-3x mb-3"></i>
@@ -81,16 +148,6 @@
             </a>
         </div>
 
-        <!-- Assinar Digitalmente (Exemplo de nova ferramenta) -->
-        <div class="col-md-3 col-sm-6 mb-4">
-            <a href="#" class="card text-center h-100">
-                <div class="card-body">
-                    <i class="fas fa-signature fa-3x mb-3"></i>
-                    <h5 class="card-title">Assinar Digitalmente</h5>
-                    <p class="card-text">Adicione uma assinatura digital ao PDF.</p>
-                </div>
-            </a>
-        </div>
     </div>
 </div>
 {% endblock %}

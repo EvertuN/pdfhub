@@ -49,13 +49,15 @@ rotateButton.addEventListener('click', async function () {
 });
 
         // Delete do preview
-        clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
-            const card = event.target.closest('.pdf-item');
-            if (card) {
-                card.remove();
-                pdfFiles = pdfFiles.filter(f => f.uniqueName !== file.uniqueName);
-            }
-        });
+// Remove o card e mantém o array consistente
+clone.querySelector('.delete-pdf').addEventListener('click', (event) => {
+    const card = event.target.closest('.pdf-item');
+    if (card) {
+        card.remove(); // Remove do DOM
+        pdfFiles = pdfFiles.filter(f => f.uniqueName !== file.uniqueName); // Atualiza lista
+        console.log("Arquivo removido:", file.name);
+    }
+});
 
         pdfPreview.appendChild(clone.querySelector('.pdf-item'));
         pdfFiles.push(file);
@@ -185,48 +187,35 @@ document.querySelector('#mergeForm').addEventListener('submit', async function (
         },
     });
 
-async function rotatePDF(file, canvas) {
-    if (!file || !canvas) {
-        console.error("Arquivo ou canvas inválido para rotação.");
-        return;
-    }
-
+async function rotatePDF(file, rotation) {
     const formData = new FormData();
-    formData.append('file', file);   // Adiciona o arquivo ao formulário
-    formData.append('angle', 90);   // Define o ângulo de rotação
+    formData.append("file_name", file.uniqueName); // Nome único do arquivo
+    formData.append("rotation", rotation); // Rotação a ser aplicada
 
     try {
         const response = await fetch(rotatePdfUrl, {
-            method: 'POST',
+            method: "POST",
             body: formData,
         });
 
         if (!response.ok) {
-            throw new Error('Erro no servidor ao processar rotação do PDF.');
+            throw new Error("Erro ao comunicar com o servidor.");
         }
 
-        // Obter o blob (PDF girado retornado pelo backend)
-        const blob = await response.blob();
-        const newPdfFile = new File([blob], file.name, { type: 'application/pdf' });
-
-        // Atualiza o preview canvas com o arquivo modificado
-        await renderPDFPreview(newPdfFile, canvas);
-
-        // Atualiza o array pdfFiles mantendo consistência no uniqueName
-        const fileIndex = pdfFiles.findIndex(f => f.uniqueName === file.uniqueName);
-        if (fileIndex !== -1) {
-            pdfFiles[fileIndex] = newPdfFile; // Atualiza o arquivo no array
-            pdfFiles[fileIndex].rotation = (pdfFiles[fileIndex].rotation || 0) + 90; // Atualiza a rotação acumulada
-        } else {
-            console.warn("Arquivo para atualização não encontrado no array.", file.name);
+        const data = await response.json();
+        if (data.status !== "success") {
+            throw new Error(data.message || "Erro ao processar rotação no servidor.");
         }
 
-        console.log(`PDF "${file.name}" rotacionado com sucesso.`);
+        console.log(`Arquivo ${data.file_name} rotacionado com sucesso no servidor.`);
+        // Atualize o nome do arquivo caso ele mude
+        file.uniqueName = data.file_name;
+
     } catch (error) {
-        console.error('Erro ao girar PDF:', error);
+        console.error("Erro ao fazer rotação via API:", error);
+//        alert("Não foi possível girar o PDF. Tente novamente.");
     }
 }
-
 // Adicionar evento de clique ao botão de girar
 pdfPreview.addEventListener('click', (e) => {
     if (e.target.classList.contains('rotate-pdf')) {
