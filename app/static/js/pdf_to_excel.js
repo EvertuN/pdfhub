@@ -1,15 +1,13 @@
-// Evento de mudança no input de arquivo
 document.getElementById("pdfFileInput").addEventListener("change", function () {
-    const fileInput = document.getElementById("pdfFileInput");
+    let fileInput = document.getElementById("pdfFileInput");
     if (fileInput.files.length === 0) {
         alert("Selecione um arquivo PDF!");
         return;
     }
 
-    const formData = new FormData();
+    let formData = new FormData();
     formData.append("file", fileInput.files[0]);
 
-    // Envia o arquivo para o servidor
     fetch("/upload-pdf-to-word", { method: "POST", body: formData })
         .then(response => response.json())
         .then(data => {
@@ -28,16 +26,11 @@ document.getElementById("pdfFileInput").addEventListener("change", function () {
             } else {
                 alert(data.message);
             }
-        })
-        .catch(error => {
-            console.error("Erro ao enviar o arquivo:", error);
-            alert("Erro ao enviar o arquivo. Por favor, tente novamente.");
         });
 });
 
-// Função para renderizar a pré-visualização do PDF
 function renderPreview(file, numPages) {
-    const previewContainer = document.getElementById("previewPages");
+    let previewContainer = document.getElementById("previewPages");
     previewContainer.innerHTML = "";
 
     const fileReader = new FileReader();
@@ -80,7 +73,6 @@ function renderPreview(file, numPages) {
     fileReader.readAsArrayBuffer(file);
 }
 
-// Evento de clique no botão de conversão
 document.getElementById("convertBtn").addEventListener("click", async function () {
     const fileInput = document.getElementById("pdfFileInput");
     if (fileInput.files.length === 0) {
@@ -92,21 +84,32 @@ document.getElementById("convertBtn").addEventListener("click", async function (
     formData.append("file", fileInput.files[0]);
 
     try {
-        const response = await fetch("/convert-pdf-to-word", { method: "POST", body: formData });
+        const response = await fetch("/convert-pdf-to-word", {
+            method: "POST",
+            body: formData,
+        });
 
         if (response.ok) {
-            const data = await response.json();
-            if (data.success) {
-                // Redireciona para a página de download
-                window.location.href = data.redirectUrl;
-            } else {
-                alert("Erro ao converter o PDF: " + data.message);
-            }
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = "converted.docx"; // Nome do arquivo baixado
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
         } else {
-            alert("Erro ao processar a solicitação.");
+                        try {
+                const result = await response.json();
+                alert(result.message || "Erro ao converter o PDF.");
+            } catch (e) {
+                alert("Erro inesperado no servidor. Verifique o console para detalhes.");
+                console.error("Erro no servidor:", await response.text());
+            }
         }
     } catch (error) {
-        console.error("Erro ao enviar o arquivo:", error);
-        alert("Erro ao enviar o arquivo. Por favor, tente novamente.");
+        console.error("Erro ao converter o PDF:", error);
+        alert("Erro inesperado. Por favor, tente novamente.");
     }
 });
