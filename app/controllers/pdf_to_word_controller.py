@@ -1,4 +1,4 @@
-from flask import Blueprint, request, jsonify, send_file, render_template, url_for
+from flask import Blueprint, request, jsonify, send_file, render_template, url_for, redirect
 from pdf2docx import Converter
 from PyPDF2 import PdfReader, PdfWriter
 import os
@@ -10,6 +10,7 @@ pdf_to_word_bp = Blueprint('pdf_to_word', __name__)
 @pdf_to_word_bp.route('/pdf-to-word', methods=['GET'])
 def pdf_to_word():
     return render_template('pdf_to_word.html')
+
 
 @pdf_to_word_bp.route('/upload-pdf-to-word', methods=['POST'])
 def upload_pdf_to_word():
@@ -29,8 +30,7 @@ def upload_pdf_to_word():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Erro ao processar o PDF: {str(e)}'}), 500
 
-# TODO// ELE ESTÁ "ENDIREITANDO" OS PDFs QUE FORAM "GIRADOS"
-# TODO// E AO CONVERTER PDFs QUE TEM IMAGEM ELE ADICIONA UMAS PÁGINAS EM BRANCO
+
 @pdf_to_word_bp.route('/convert-pdf-to-word', methods=['POST'])
 def convert_pdf_to_word():
     if 'file' not in request.files:
@@ -41,54 +41,68 @@ def convert_pdf_to_word():
         return jsonify({'success': False, 'message': 'Nenhum arquivo selecionado.'}), 400
 
     try:
-        # Salvar o PDF temporariamente
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
-            file.save(temp_pdf.name)
-            temp_pdf_path = temp_pdf.name
+        print("Recebendo o arquivo PDF para conversão.")
 
-        # Ajustar e corrigir o PDF (opcional, dependendo da necessidade)
-        # Aqui é opcional ajustar rotações ou outras alterações
-        pdf_reader = PdfReader(temp_pdf_path)
+        # Carregar PDF em memória
+        pdf_bytes = io.BytesIO(file.read())
+        pdf_bytes.seek(0)
+
+        # Ajustar rotação (se necessário)
+        pdf_reader = PdfReader(pdf_bytes)
         pdf_writer = PdfWriter()
 
+        print("Corrigindo rotações (se necessário).")
         for page in pdf_reader.pages:
             rotation = page.get("/Rotate", 0)
             if rotation != 0:
                 page.rotate(-rotation)  # Corrigir rotação
             pdf_writer.add_page(page)
 
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as corrected_pdf:
-            pdf_writer.write(corrected_pdf)
-            corrected_pdf_path = corrected_pdf.name
+        # Criar um PDF corrigido temporário
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
+            pdf_writer.write(temp_pdf)
+            temp_pdf_path = temp_pdf.name
 
-        # Converter PDF corrigido para Word
-        output_docx_path = os.path.join('app/static/uploads', f"{os.path.splitext(file.filename)[0]}.docx")
+        print("Conversão do PDF para DOCX iniciada...")
 
-        cv = Converter(corrected_pdf_path)
-        cv.convert(output_docx_path, detailed_analysis=True)
+        # Criar um arquivo temporário para armazenar o DOCX
+        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
+            temp_docx_path = temp_docx.name
+
+        # Converter PDF para Word usando caminho de arquivo temporário
+        cv = Converter(temp_pdf_path)
+        cv.convert(temp_docx_path, start=0, end=None)
         cv.close()
 
-        # Excluir arquivos temporários
+        print("Conversão concluída! Preparando para download.")
+
+        # Ler o arquivo convertido para memória antes de excluí-lo
+        with open(temp_docx_path, "rb") as docx_file:
+            docx_bytes = io.BytesIO(docx_file.read())
+
+        # Remover arquivos temporários do disco
+        import os
         os.remove(temp_pdf_path)
-        os.remove(corrected_pdf_path)
+        os.remove(temp_docx_path)
 
-        # Redirecionar para a página de download
-        download_url = url_for('pdf_to_word.download_word', filename=os.path.basename(output_docx_path), _external=True)
+        # Retornar o arquivo DOCX sem salvar no disco permanentemente
+        return send_file(
+            docx_bytes,
+            mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            as_attachment=True,
+            download_name=f"{file.filename.rsplit('.', 1)[0]}.docx"
+        )
 
-        return jsonify({'success': True, 'redirectUrl': download_url})
     except Exception as e:
-        # Excluir arquivos temporários em caso de erro
-        if 'temp_pdf_path' in locals() and os.path.exists(temp_pdf_path):
-            os.remove(temp_pdf_path)
-        if 'corrected_pdf_path' in locals() and os.path.exists(corrected_pdf_path):
-            os.remove(corrected_pdf_path)
-        return jsonify({'success': False, 'message': f'Erro ao converter o PDF: {str(e)}'}), 500
+        print(f"Erro ao converter PDF: {e}")
+        return jsonify({'success': False, 'message': f'Erro interno: {str(e)}'}), 500
+
 
 
 @pdf_to_word_bp.route('/download-word/<filename>')
 def download_word(filename):
     """
-    Página de download do arquivo Word convertido.
+    Redireciona diretamente o cliente para a URL final do arquivo, sem renderizar página.
     """
     file_path = os.path.join('app/static/uploads', filename)
 
@@ -96,8 +110,6 @@ def download_word(filename):
     if not os.path.exists(file_path):
         return render_template("download.html", success=False, message="O arquivo solicitado não está disponível.")
 
-    # Gera o URL para baixar diretamente
-    direct_download_url = url_for('static', filename=f'uploads/{filename}', _external=True)
-    return render_template("download.html", success=True, download_url=direct_download_url,
-                           file_title="Seu PDF foi convertido em um WORD editável",
-                           file_type='documento Word')
+    # Gera o URL direto do arquivo para redirecionar
+    return redirect(url_for('static', filename=f'uploads/{filename}', _external=True))
+

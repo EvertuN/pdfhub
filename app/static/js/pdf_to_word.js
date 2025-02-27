@@ -92,18 +92,34 @@ document.getElementById("convertBtn").addEventListener("click", async function (
     formData.append("file", fileInput.files[0]);
 
     try {
-        const response = await fetch("/convert-pdf-to-word", { method: "POST", body: formData });
+        const response = await fetch("/convert-pdf-to-word", {
+            method: "POST",
+            body: formData
+        });
 
-        if (response.ok) {
+        // Verificar o tipo de resposta
+        const contentType = response.headers.get("content-type");
+
+        if (contentType.includes("application/json")) {
+            // Se for JSON, processar normalmente
             const data = await response.json();
             if (data.success) {
-                // Redireciona para a página de download
                 window.location.href = data.redirectUrl;
             } else {
                 alert("Erro ao converter o PDF: " + data.message);
             }
+        } else if (contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            // Se for um arquivo DOCX, fazer o download
+            const blob = await response.blob();
+            const downloadUrl = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = downloadUrl;
+            a.download = fileInput.files[0].name.replace(".pdf", ".docx");
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         } else {
-            alert("Erro ao processar a solicitação.");
+            alert("Resposta inesperada do servidor.");
         }
     } catch (error) {
         console.error("Erro ao enviar o arquivo:", error);

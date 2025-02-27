@@ -8,11 +8,8 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/controllers/pdf_to_word_controller.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/controllers/pdf_to_word_controller.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/static/js/pdf_to_word.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/pdf_to_word.js" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/static/uploads/2.pdf" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/base.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/base.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/templates/pdf_to_word.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/pdf_to_word.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/output/temp_merged_dividido.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/uploads/temp_merged.docx" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
