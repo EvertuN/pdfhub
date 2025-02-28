@@ -14,6 +14,7 @@ def create_app(config_class=Config):
     from app.controllers.watermark_controller import watermark_bp
     from app.controllers.compress_pdf_controller import compress_pdf_bp
     from app.controllers.pdf_to_word_controller import pdf_to_word_bp
+    from app.controllers.pdf_to_excel_controller import pdf_to_excel_bp
 
     app.register_blueprint(home_bp)
     app.register_blueprint(split_pdf_bp)
@@ -24,5 +25,6 @@ def create_app(config_class=Config):
     app.register_blueprint(watermark_bp)
     app.register_blueprint(compress_pdf_bp)
     app.register_blueprint(pdf_to_word_bp)
+    app.register_blueprint(pdf_to_excel_bp)
 
     return app

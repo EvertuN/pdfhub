@@ -30,7 +30,6 @@ def upload_pdf_to_word():
     except Exception as e:
         return jsonify({'success': False, 'message': f'Erro ao processar o PDF: {str(e)}'}), 500
 
-
 @pdf_to_word_bp.route('/convert-pdf-to-word', methods=['POST'])
 def convert_pdf_to_word():
     if 'file' not in request.files:
@@ -41,75 +40,51 @@ def convert_pdf_to_word():
         return jsonify({'success': False, 'message': 'Nenhum arquivo selecionado.'}), 400
 
     try:
-        print("Recebendo o arquivo PDF para conversão.")
+        # Ler o arquivo PDF em memória
+        pdf_stream = io.BytesIO(file.read())
+        pdf_reader = PdfReader(pdf_stream)
 
-        # Carregar PDF em memória
-        pdf_bytes = io.BytesIO(file.read())
-        pdf_bytes.seek(0)
-
-        # Ajustar rotação (se necessário)
-        pdf_reader = PdfReader(pdf_bytes)
+        # Corrigir a rotação das páginas (se necessário)
         pdf_writer = PdfWriter()
-
-        print("Corrigindo rotações (se necessário).")
         for page in pdf_reader.pages:
             rotation = page.get("/Rotate", 0)
             if rotation != 0:
                 page.rotate(-rotation)  # Corrigir rotação
             pdf_writer.add_page(page)
 
-        # Criar um PDF corrigido temporário
+        # Salvar o PDF corrigido em um arquivo temporário em memória
         with tempfile.NamedTemporaryFile(delete=False, suffix=".pdf") as temp_pdf:
             pdf_writer.write(temp_pdf)
             temp_pdf_path = temp_pdf.name
 
-        print("Conversão do PDF para DOCX iniciada...")
-
-        # Criar um arquivo temporário para armazenar o DOCX
-        with tempfile.NamedTemporaryFile(delete=False, suffix=".docx") as temp_docx:
-            temp_docx_path = temp_docx.name
-
-        # Converter PDF para Word usando caminho de arquivo temporário
+        # Converter PDF corrigido para Word em memória
+        word_stream = io.BytesIO()
         cv = Converter(temp_pdf_path)
-        cv.convert(temp_docx_path, start=0, end=None)
+        cv.convert(word_stream)
         cv.close()
 
-        print("Conversão concluída! Preparando para download.")
+        word_stream.seek(0)
 
-        # Ler o arquivo convertido para memória antes de excluí-lo
-        with open(temp_docx_path, "rb") as docx_file:
-            docx_bytes = io.BytesIO(docx_file.read())
-
-        # Remover arquivos temporários do disco
+        # Excluir o arquivo temporário após a conversão
         import os
         os.remove(temp_pdf_path)
-        os.remove(temp_docx_path)
 
-        # Retornar o arquivo DOCX sem salvar no disco permanentemente
+        # Retornar o arquivo Word para o usuário
         return send_file(
-            docx_bytes,
+            word_stream,
             mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             as_attachment=True,
             download_name=f"{file.filename.rsplit('.', 1)[0]}.docx"
         )
-
     except Exception as e:
-        print(f"Erro ao converter PDF: {e}")
-        return jsonify({'success': False, 'message': f'Erro interno: {str(e)}'}), 500
+        # Excluir o arquivo temporário em caso de erro
+        if 'temp_pdf_path' in locals() and os.path.exists(temp_pdf_path):
+            os.remove(temp_pdf_path)
+        return jsonify({'success': False, 'message': f'Erro ao converter o PDF: {str(e)}'}), 500
 
+@pdf_to_word_bp.route('/download-hub', methods=['GET'])
+def download_hub():
+    # Renderiza a página de sucesso após o download
+    return render_template('download.html')
 
-
-@pdf_to_word_bp.route('/download-word/<filename>')
-def download_word(filename):
-    """
-    Redireciona diretamente o cliente para a URL final do arquivo, sem renderizar página.
-    """
-    file_path = os.path.join('app/static/uploads', filename)
-
-    # Verifica se o arquivo existe
-    if not os.path.exists(file_path):
-        return render_template("download.html", success=False, message="O arquivo solicitado não está disponível.")
-
-    # Gera o URL direto do arquivo para redirecionar
-    return redirect(url_for('static', filename=f'uploads/{filename}', _external=True))
 

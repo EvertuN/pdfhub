@@ -1,4 +1,3 @@
-// Evento de mudança no input de arquivo
 document.getElementById("pdfFileInput").addEventListener("change", function () {
     const fileInput = document.getElementById("pdfFileInput");
     if (fileInput.files.length === 0) {
@@ -35,7 +34,6 @@ document.getElementById("pdfFileInput").addEventListener("change", function () {
         });
 });
 
-// Função para renderizar a pré-visualização do PDF
 function renderPreview(file, numPages) {
     const previewContainer = document.getElementById("previewPages");
     previewContainer.innerHTML = "";
@@ -80,13 +78,18 @@ function renderPreview(file, numPages) {
     fileReader.readAsArrayBuffer(file);
 }
 
-// Evento de clique no botão de conversão
 document.getElementById("convertBtn").addEventListener("click", async function () {
     const fileInput = document.getElementById("pdfFileInput");
+
     if (fileInput.files.length === 0) {
         alert("Selecione um arquivo PDF!");
         return;
     }
+
+    // Adicionar um loader ao botão
+    const convertBtn = document.getElementById("convertBtn");
+    convertBtn.disabled = true;
+    convertBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Convertendo...';
 
     const formData = new FormData();
     formData.append("file", fileInput.files[0]);
@@ -94,22 +97,14 @@ document.getElementById("convertBtn").addEventListener("click", async function (
     try {
         const response = await fetch("/convert-pdf-to-word", {
             method: "POST",
-            body: formData
+            body: formData,
         });
 
         // Verificar o tipo de resposta
         const contentType = response.headers.get("content-type");
 
-        if (contentType.includes("application/json")) {
-            // Se for JSON, processar normalmente
-            const data = await response.json();
-            if (data.success) {
-                window.location.href = data.redirectUrl;
-            } else {
-                alert("Erro ao converter o PDF: " + data.message);
-            }
-        } else if (contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
-            // Se for um arquivo DOCX, fazer o download
+        if (contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            // Se for um arquivo DOCX, iniciar o download
             const blob = await response.blob();
             const downloadUrl = window.URL.createObjectURL(blob);
             const a = document.createElement("a");
@@ -117,12 +112,20 @@ document.getElementById("convertBtn").addEventListener("click", async function (
             a.download = fileInput.files[0].name.replace(".pdf", ".docx");
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            a.remove();
+
+            // Depois de iniciar o download, redirecionar para a página de sucesso
+            window.location.href = "/download-hub";
         } else {
-            alert("Resposta inesperada do servidor.");
+            const data = await response.json();
+            alert("Erro: " + data.message);
         }
     } catch (error) {
-        console.error("Erro ao enviar o arquivo:", error);
-        alert("Erro ao enviar o arquivo. Por favor, tente novamente.");
+        console.error("Erro ao converter:", error);
+        alert("Erro durante a conversão. Por favor, tente novamente.");
+    } finally {
+        // Voltar o botão para o estado normal
+        convertBtn.disabled = false;
+        convertBtn.innerHTML = '<i class="fas fa-file-word"></i> Converter para Word';
     }
 });

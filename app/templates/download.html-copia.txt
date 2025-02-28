@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <h2>{{ file_title }}</h2>
+    <p>Seu arquivo está pronto para ser baixado.</p>
+
+    <div class="d-flex justify-content-center align-items-center gap-3">
+        <a href="javascript:history.back()" class="btn btn-secondary rounded-circle">
+            <i class="fas fa-arrow-left"></i>
+        </a>
+        &nbsp&nbsp
+        <a href="{{ download_url }}" class="btn btn-primary btn-lg" download>
+            <i class="fas fa-download"></i> Baixar {{ file_type }}
+        </a>
+        &nbsp&nbsp
+        <button id="deleteFileBtn" class="btn btn-danger rounded-circle" data-filename="temp_merged.pdf" data-type="{{ file_type }}">
+            <i class="fas fa-trash"></i>
+        </button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/download.js') }}"></script>
+{% endblock %}
